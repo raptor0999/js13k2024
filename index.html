@@ -122,18 +122,18 @@ image.onload = function() {
         frameHeight: 32,
         animations: {
             idle: {
-                frames: [0, 1, 2],
-                frameRate: 10,
+                frames: [0, 1, 2, 3],
+                frameRate: 5,
                 loop: true,
             },
             walk: {
                 frames: [4, 5, 6, 7],
-                frameRate: 10,
+                frameRate: 5,
                 loop: true,
             },
             die: {
                 frames: 10,
-                frameRate: 10,
+                frameRate: 5,
                 loop: false,
             }
         }
@@ -194,6 +194,7 @@ image.onload = function() {
 
         if(primes.includes(score)) {
             this.isPrimed = true;
+            reverseBadShit();
             doBadShit();
         } else {
             this.isPrimed = false;
