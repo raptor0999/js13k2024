@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8" />
+
+<style id="webmakerstyle">
+body {
+  background: black;
+}
+canvas {
+  border: 1px solid white;  
+} 
+</style>
+</head>
+<body>
+  <canvas width="720" height="480" id="canvas"></canvas>
+
+<script src="kontra.min.js"></script>
+<script src="player-small.js"></script>
+<script src="Javabox1.js"></script>
+
+<script>
+let { init, Sprite, GameLoop, initKeys, keyPressed, initGamepad, gamepadPressed, gamepadAxis } = kontra
+
+let { canvas, context } = init();
+
+    var letters = letters = {
+        'A': [
+            [, 1],
+            [1, , 1],
+            [1, , 1],
+            [1, 1, 1],
+            [1, , 1]
+        ],
+        'B': [
+            [1, 1],
+            [1, , 1],
+            [1, 1, 1],
+            [1, , 1],
+            [1, 1]
+        ],
+        'C': [
+            [1, 1, 1],
+            [1],
+            [1],
+            [1],
+            [1, 1, 1]
+        ],
+        'D': [
+            [1, 1],
+            [1, , 1],
+            [1, , 1],
+            [1, , 1],
+            [1, 1]
+        ],
+        'E': [
+            [1, 1, 1],
+            [1],
+            [1, 1, 1],
+            [1],
+            [1, 1, 1]
+        ],
+        'F': [
+            [1, 1, 1],
+            [1],
+            [1, 1],
+            [1],
+            [1]
+        ],
+        'G': [
+            [, 1, 1],
+            [1],
+            [1, , 1, 1],
+            [1, , , 1],
+            [, 1, 1]
+        ],
+        'H': [
+            [1, , 1],
+            [1, , 1],
+            [1, 1, 1],
+            [1, , 1],
+            [1, , 1]
+        ],
+        'I': [
+            [1, 1, 1],
+            [, 1],
+            [, 1],
+            [, 1],
+            [1, 1, 1]
+        ],
+        'J': [
+            [1, 1, 1],
+            [, , 1],
+            [, , 1],
+            [1, , 1],
+            [1, 1, 1]
+        ],
+        'K': [
+            [1, , , 1],
+            [1, , 1],
+            [1, 1],
+            [1, , 1],
+            [1, , , 1]
+        ],
+        'L': [
+            [1],
+            [1],
+            [1],
+            [1],
+            [1, 1, 1]
+        ],
+        'M': [
+            [1, 1, 1, 1, 1],
+            [1, , 1, , 1],
+            [1, , 1, , 1],
+            [1, , , , 1],
+            [1, , , , 1]
+        ],
+        'N': [
+            [1, , , 1],
+            [1, 1, , 1],
+            [1, , 1, 1],
+            [1, , , 1],
+            [1, , , 1]
+        ],
+        'O': [
+            [1, 1, 1],
+            [1, , 1],
+            [1, , 1],
+            [1, , 1],
+            [1, 1, 1]
+        ],
+        'P': [
+            [1, 1, 1],
+            [1, , 1],
+            [1, 1, 1],
+            [1],
+            [1]
+        ],
+        'Q': [
+            [0, 1, 1],
+            [1, , , 1],
+            [1, , , 1],
+            [1, , 1, 1],
+            [1, 1, 1, 1]
+        ],
+        'R': [
+            [1, 1],
+            [1, , 1],
+            [1, , 1],
+            [1, 1],
+            [1, , 1]
+        ],
+        'S': [
+            [1, 1, 1],
+            [1],
+            [1, 1, 1],
+            [, , 1],
+            [1, 1, 1]
+        ],
+        'T': [
+            [1, 1, 1],
+            [, 1],
+            [, 1],
+            [, 1],
+            [, 1]
+        ],
+        'U': [
+            [1, , 1],
+            [1, , 1],
+            [1, , 1],
+            [1, , 1],
+            [1, 1, 1]
+        ],
+        'V': [
+            [1, , , , 1],
+            [1, , , , 1],
+            [, 1, , 1],
+            [, 1, , 1],
+            [, , 1]
+        ],
+        'W': [
+            [1, , , , 1],
+            [1, , , , 1],
+            [1, , , , 1],
+            [1, , 1, , 1],
+            [1, 1, 1, 1, 1]
+        ],
+        'X': [
+            [1, , , , 1],
+            [, 1, , 1],
+            [, , 1],
+            [, 1, , 1],
+            [1, , , , 1]
+        ],
+        'Y': [
+            [1, , 1],
+            [1, , 1],
+            [, 1],
+            [, 1],
+            [, 1]
+        ],
+        'Z': [
+            [1, 1, 1, 1, 1],
+            [, , , 1],
+            [, , 1],
+            [, 1],
+            [1, 1, 1, 1, 1]
+        ],
+        '0': [
+            [1, 1, 1],
+            [1, , 1],
+            [1, , 1],
+            [1, , 1],
+            [1, 1, 1]
+        ],
+        '1': [
+            [, 1],
+            [, 1],
+            [, 1],
+            [, 1],
+            [, 1]
+        ],
+        '2': [
+            [1,1,1],
+            [0,0,1],
+            [1,1,1],
+            [1,0,0],
+            [1,1,1]
+        ],
+        '3':[
+            [1,1,1],
+            [0,0,1],
+            [1,1,1],
+            [0,0,1],
+            [1,1,1]
+        ],
+        '4':[
+            [1,0,1],
+            [1,0,1],
+            [1,1,1],
+            [0,0,1],
+            [0,0,1]
+        ],
+        '5':[
+            [1,1,1],
+            [1,0,0],
+            [1,1,1],
+            [0,0,1],
+            [1,1,1]
+        ],
+        '6':[
+            [1,1,1],
+            [1,0,0],
+            [1,1,1],
+            [1,0,1],
+            [1,1,1]
+        ],
+        '7':[
+            [1,1,1],
+            [0,0,1],
+            [0,0,1],
+            [0,0,1],
+            [0,0,1]
+        ],
+        '8':[
+            [1,1,1],
+            [1,0,1],
+            [1,1,1],
+            [1,0,1],
+            [1,1,1]
+        ],
+        '9':[
+            [1,1,1],
+            [1,0,1],
+            [1,1,1],
+            [0,0,1],
+            [1,1,1]
+        ],
+        ' ': [
+            [, ,],
+            [, ,],
+            [, ,],
+            [, ,],
+            [, ,]
+        ]
+    };
+
+    function draw(string, size, color) {
+        
+
+        var needed = [];
+        string = string.toUpperCase(); // because I only did uppercase letters
+        for (var i = 0; i < string.length; i++) {
+            var letter = letters[string.charAt(i)];
+            if (letter) { // because there's letters I didn't do
+                needed.push(letter);
+            }
+        }
+
+        context.fillStyle = color;
+        var currX = 0;
+        for (i = 0; i < needed.length; i++) {
+            letter = needed[i];
+            var currY = 0;
+            var addX = 0;
+            for (var y = 0; y < letter.length; y++) {
+                var row = letter[y];
+                for (var x = 0; x < row.length; x++) {
+                    if (row[x]) {
+                        context.fillRect(currX + x * size, currY, size, size);
+                    }
+                }
+                addX = Math.max(addX, row.length * size);
+                currY += size;
+            }
+            currX += size + addX;
+        }
+
+        //console.log('Drew ' + string + ' at ' + size);
+    }
+
+// Initialize music generation (player).
+  var t0 = new Date();
+  var playerz = new CPlayer();
+  playerz.init(song);
+
+  // Generate music...
+  var done = false;
+  setInterval(function () {
+    if (done) {
+      return;
+    }
+
+    done = playerz.generate() >= 1;
+
+    if (done) {
+      var t1 = new Date();
+      //s.textContent = s.textContent + "done (" + (t1 - t0) + "ms)";
+
+      // Put the generated song in an Audio element.
+      var wave = playerz.createWave();
+      var audio = document.createElement("audio");
+      audio.src = URL.createObjectURL(new Blob([wave], {type: "audio/wav"}));
+      audio.loop = true;
+      audio.play();
+    }
+  });
+
+var canvasX = 720;
+var canvasY = 480;
+
+initKeys();
+initGamepad();
+
+let player = Sprite({
+  speed: 3,
+  x: 100,        // starting x,y position of the sprite
+  y: 80,
+  color: '#eeeeee',  // fill color of the sprite rectangle
+  width: 20,     // width and height of the sprite rectangle
+  height: 20,        // move the sprite 2px to the right every frame
+  update() {
+    // check the axis of the gamepad connected to index 0
+    let axisX = gamepadAxis('leftstickx', 0);
+    let axisY = gamepadAxis('leftsticky', 0);
+
+    if (axisX < -0.4 || keyPressed(['arrowleft', 'a'])) {
+      this.x -= 1*this.speed;
+    }
+    else if (axisX > 0.4 || keyPressed(['arrowright', 'd'])) {
+      this.x += 1*this.speed;
+    }
+
+    if (axisY < -0.4 || keyPressed(['arrowup', 'w'])) {
+      this.y -= 1*this.speed;
+    }
+    else if (axisY > 0.4 || keyPressed(['arrowdown', 's'])) {
+      this.y += 1*this.speed;
+    }
+
+    for(var i = 0; i < letterz.length; i++) {
+      var playerMidX = this.x + this.width/2;
+      var playerMidY = this.y + this.height/2;
+      let lett = letterz[i];
+
+      if(playerMidX >= lett.x && playerMidX <= lett.x + lett.width && playerMidY >= lett.y && playerMidY <= lett.y + lett.height) {
+        ui.score += parseInt(lett.content);
+        ui.content = 'Score: ' + ui.score;
+        lett.ttl = 0;
+      }
+    }
+  }
+});
+
+let letterz = [];
+
+function createLetter() {
+  let letter = Sprite({
+    content: Math.floor((Math.random()*8)+1).toString(),
+    speed: 1,
+    x: Math.floor(Math.random()*canvasX),        // starting x,y position of the sprite
+    y: 0,
+    color: '#eeeeee',  // fill color of the sprite rectangle
+    width: 20,     // width and height of the sprite rectangle
+    height: 20,        // move the sprite 2px to the right every frame
+    update() {
+      this.y += 1*this.speed;
+    },
+    render() {
+      draw(this.content, 4, this.color);
+    }
+  });
+  letterz.push(letter);
+}
+
+for(var i = 0; i < 6; i++) {
+  createLetter();
+}
+
+let ui = Sprite({
+    content: 'Score: ' + 0,
+    score: 0,
+    x: 5,        // starting x,y position of the sprite
+    y: 5,
+    color: '#eeeeee',  // fill color of the sprite rectangle
+    width: 20,     // width and height of the sprite rectangle
+    height: 20,        // move the sprite 2px to the right every frame
+    update() {
+      if (this.content.includes("13")) {
+        this.color = '#FF0000';
+      } else {
+        this.color = '#eeeeee';
+      }
+    },
+    render() {
+      draw(this.content, 4, this.color);
+    }
+  });
+
+let loop = GameLoop({  // create the main game loop
+  update: function() { // update the game state
+    ui.update();
+    player.update();
+
+    // wrap the sprites position when it reaches
+    // the edge of the screen
+    if (player.x > canvas.width) {
+      player.x = 0;
+    }
+    if (player.x < 0) {
+      player.x = canvas.width;
+    }
+
+    letterz.map(letter => {
+      letter.update();
+
+      if (letter.y + letter.height > canvasY) {
+        letter.ttl = 0;
+      }
+    });
+
+    letterz = letterz.filter(letter => letter.isAlive());
+    if (letterz.length < 1) {
+      for(var i = 0; i < 6; i++) {
+        createLetter();
+      }
+    }
+
+    ui.update();
+  },
+  render: function() { // render the game state
+    player.render();
+
+    letterz.map(letter => {
+      letter.render();
+    });
+    ui.render();
+  }
+});
+
+loop.start();    // start the game
+
+</script>
+</body>
+</html>
