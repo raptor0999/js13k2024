@@ -14,8 +14,9 @@ body {
 
 <script src="kontra9.min.js"></script>
 <script src="player-small.js"></script>
-<script src="Javabox1.js"></script>
-<script src="SoundboxDeath.js"></script>
+<script src="13game.js"></script>
+<script src="13menu.js"></script>
+<script src="13death.js"></script>
 <script src="https://sfxr.me/riffwave.js"></script>
 <script src="https://sfxr.me/sfxr.js"></script>
 <script src="sounds.js"></script>
@@ -27,13 +28,17 @@ let { init, Sprite, SpriteSheet, GameLoop, initKeys, keyPressed, initGamepad, ga
 let { canvas, context } = init();
 
   // Initialize music generation (player).
-  var playerz = new CPlayer();
-  playerz.init(song);
+  var playerz_game = new CPlayer();
+  playerz_game.init(song);
+  var playerz_menu = new CPlayer();
+  playerz_menu.init(menu_song);
   var playerz_death = new CPlayer();
   playerz_death.init(death_song);
+  var menu_wave;
   var death_wave;
   var song1_wave_src;
   var death_wave_src;
+  var menu_wave_src;
 
   // Generate music...
   var done = false;
@@ -43,15 +48,14 @@ let { canvas, context } = init();
       return;
     }
 
-    done = playerz.generate() >= 1;
+    done = playerz_game.generate() >= 1;
 
     if (done) {
       var t1 = new Date();
       //s.textContent = s.textContent + "done (" + (t1 - t0) + "ms)";
 
       // Put the generated song in an Audio element.
-      var wave = playerz.createWave();
-      audio = document.createElement("audio");
+      var wave = playerz_game.createWave();
       song1_wave_src = URL.createObjectURL(new Blob([wave], {type: "audio/wav"}));
       
     }
@@ -70,6 +74,26 @@ let { canvas, context } = init();
     if (done_death) {
       death_wave = playerz_death.createWave();
       death_wave_src = URL.createObjectURL(new Blob([death_wave], {type: "audio/wav"}));
+    }
+  });
+
+  var done_menu = false
+  playerz_menu.init(menu_song);
+
+  setInterval(function () {
+    if (done_menu) {
+      return;
+    }
+
+    done_menu = playerz_menu.generate() >= 1;
+
+    if (done_menu) {
+      menu_wave = playerz_menu.createWave();
+      menu_wave_src = URL.createObjectURL(new Blob([menu_wave], {type: "audio/wav"}));
+      audio = document.createElement("audio");
+        audio.src = menu_wave_src;
+        audio.loop = true;
+        audio.play();
     }
   });
 
@@ -323,6 +347,10 @@ let loop = GameLoop({  // create the main game loop
             new_game();
         }
     }
+
+    if(gamepadPressed('select') || keyPressed(['m'])) {
+        audio.muted = !audio.muted;
+    }
   },
   render: function() { // render the game state
     if (game_started) {
@@ -340,11 +368,12 @@ let loop = GameLoop({  // create the main game loop
             draw("GAME OVER", 12, 'red', 125, 200);
         }
     } else {
-        title();
+        draw_title();
     }
   }
 });
 
+draw_title();
 title();
 loop.start();    // start the game
 
@@ -399,6 +428,10 @@ function restart() {
 };
 
 function title() {
+    
+}
+
+function draw_title() {
     draw("PRIMONUMEROPHOBIA", 9, 'red', 33, 200);
 }
 
