@@ -7,9 +7,6 @@
 body {
   background: black;
 }
-canvas {
-  border: 1px solid white;  
-} 
 </style>
 </head>
 <body>
@@ -84,10 +81,11 @@ var level_audio = sfxr.toAudio(level_sound);
 var canvasX = 720;
 var canvasY = 480;
 var level = 1;
-var countdownStart = 5;
-var levelEndScore = 20;
+var countdownStart = 15;
+var levelEndScore = 100;
 var score = 0;
 var timer = countdownStart;
+var game_started = false;
 
 initKeys();
 initGamepad();
@@ -102,17 +100,17 @@ image.onload = function() {
         animations: {
             idle: {
                 frames: [0, 1, 2],
-                frameRate: 30,
+                frameRate: 10,
                 loop: true,
             },
             walk: {
                 frames: [4, 5, 6, 7],
-                frameRate: 30,
+                frameRate: 10,
                 loop: true,
             },
             die: {
                 frames: 10,
-                frameRate: 30,
+                frameRate: 10,
                 loop: false,
             }
         }
@@ -125,6 +123,7 @@ image.onload = function() {
   y: 240,
   anchor: {x: 0.5, y: 0.5},       // move the sprite 2px to the right every frame
   animations: spriteSheet.animations,
+  ttl: 0,
   update() {
     // check the axis of the gamepad connected to index 0
     let axisX = gamepadAxis('leftstickx', 0);
@@ -159,10 +158,6 @@ image.onload = function() {
         pickup_audio.play();
         score += parseInt(lett.content);
         timer += parseInt(lett.content);
-        
-        if (scorez.content.includes("13")) {
-            score = 0;
-        }
 
         if (score >= levelEndScore) {
             score = 0;
@@ -193,6 +188,7 @@ image.onload = function() {
 });
 
     let letterz = [];
+    let primes = [2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59,61,67,71,73,79,83,89,97];
 
 function createLetter() {
   let letter = Sprite({
@@ -236,8 +232,8 @@ let scorez = Sprite({
     width: 20,     // width and height of the sprite rectangle
     height: 20,        // move the sprite 2px to the right every frame
     update() {
-      if (this.content.includes("13")) {
-        this.color = '#FF0000';
+      if (primes.includes(score)) {
+        this.color = '#ff0000';
       } else {
         this.color = '#eeeeee';
       }
@@ -257,7 +253,7 @@ let timerz = Sprite({
     update() {
       this.content = 'Time Left: ' + timer;
       if (timer < 10) {
-        this.color = '#FF0000';
+        this.color = '#ff0000';
       } else {
         this.color = '#eeeeee';
       }
@@ -274,7 +270,7 @@ function countDown() {
 }
 
 let loop = GameLoop({  // create the main game loop
-  update: function(dt) { // update the game state
+  update: function() { // update the game state
     if (player.isAlive()) {
         levelz.update();
         scorez.update();
@@ -311,25 +307,36 @@ let loop = GameLoop({  // create the main game loop
 
         scorez.update();
     } else {
-        if (gamepadPressed('south') || keyPressed(['r', 'enter', 'space'])) {
+        if (game_started && (gamepadPressed('south') || keyPressed(['r', 'enter', 'space']))) {
             restart();
+        }
+        if (!game_started  && (gamepadPressed('south') || keyPressed(['r', 'enter', 'space']))) {
+            new_game();
         }
     }
   },
   render: function() { // render the game state
-    player.render();
+    if (game_started) {
+        player.render();
 
-    letterz.map(letter => {
-      letter.render();
-    });
+        letterz.map(letter => {
+          letter.render();
+        });
 
-    levelz.render();
-    scorez.render();
-    timerz.render();
+        levelz.render();
+        scorez.render();
+        timerz.render();
+
+        if (!player.isAlive()) {
+            draw("GAME OVER", 12, 'red', 125, 200);
+        }
+    } else {
+        title();
+    }
   }
 });
 
-new_game();
+title();
 loop.start();    // start the game
 
 function die() {
@@ -357,6 +364,7 @@ function new_game() {
     player.x = canvasX/2;
     player.y = canvasY/2;
     player.ttl = Infinity;
+    game_started = true;
 };
 
 function restart() {
@@ -377,6 +385,10 @@ function restart() {
     audio.loop = loop;
     audio.play();
 };
+
+function title() {
+    draw("PRIMONUMEROPHOBIA", 9, 'red', 33, 200);
+}
 
 };
 

@@ -267,7 +267,7 @@ var letters = letters = {
         ]
     };
 
-    function draw(string, size, color) {
+    function draw(string, size, color, draw_x=0, draw_y=0) {
         var needed = [];
         string = string.toUpperCase(); // because I only did uppercase letters
         for (var i = 0; i < string.length; i++) {
@@ -278,10 +278,10 @@ var letters = letters = {
         }
 
         context.fillStyle = color;
-        var currX = 0;
+        var currX = draw_x;
         for (i = 0; i < needed.length; i++) {
             letter = needed[i];
-            var currY = 0;
+            var currY = draw_y;
             var addX = 0;
             for (var y = 0; y < letter.length; y++) {
                 var row = letter[y];
