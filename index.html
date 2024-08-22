@@ -15,322 +15,21 @@ canvas {
 <body>
   <canvas width="720" height="480" id="canvas"></canvas>
 
-<script src="kontra.min.js"></script>
+<script src="kontra9.min.js"></script>
 <script src="player-small.js"></script>
 <script src="Javabox1.js"></script>
 <script src="SoundboxDeath.js"></script>
 <script src="https://sfxr.me/riffwave.js"></script>
 <script src="https://sfxr.me/sfxr.js"></script>
 <script src="sounds.js"></script>
+<script src="tinyfont.js"></script>
 
 <script>
 let { init, Sprite, SpriteSheet, GameLoop, initKeys, keyPressed, initGamepad, gamepadPressed, gamepadAxis } = kontra
 
 let { canvas, context } = init();
 
-    var letters = letters = {
-        'A': [
-            [, 1],
-            [1, , 1],
-            [1, , 1],
-            [1, 1, 1],
-            [1, , 1]
-        ],
-        'B': [
-            [1, 1],
-            [1, , 1],
-            [1, 1, 1],
-            [1, , 1],
-            [1, 1]
-        ],
-        'C': [
-            [1, 1, 1],
-            [1],
-            [1],
-            [1],
-            [1, 1, 1]
-        ],
-        'D': [
-            [1, 1],
-            [1, , 1],
-            [1, , 1],
-            [1, , 1],
-            [1, 1]
-        ],
-        'E': [
-            [1, 1, 1],
-            [1],
-            [1, 1, 1],
-            [1],
-            [1, 1, 1]
-        ],
-        'F': [
-            [1, 1, 1],
-            [1],
-            [1, 1],
-            [1],
-            [1]
-        ],
-        'G': [
-            [, 1, 1],
-            [1],
-            [1, , 1, 1],
-            [1, , , 1],
-            [, 1, 1]
-        ],
-        'H': [
-            [1, , 1],
-            [1, , 1],
-            [1, 1, 1],
-            [1, , 1],
-            [1, , 1]
-        ],
-        'I': [
-            [1, 1, 1],
-            [, 1],
-            [, 1],
-            [, 1],
-            [1, 1, 1]
-        ],
-        'J': [
-            [1, 1, 1],
-            [, , 1],
-            [, , 1],
-            [1, , 1],
-            [1, 1, 1]
-        ],
-        'K': [
-            [1, , , 1],
-            [1, , 1],
-            [1, 1],
-            [1, , 1],
-            [1, , , 1]
-        ],
-        'L': [
-            [1],
-            [1],
-            [1],
-            [1],
-            [1, 1, 1]
-        ],
-        'M': [
-            [1, 1, 1, 1, 1],
-            [1, , 1, , 1],
-            [1, , 1, , 1],
-            [1, , , , 1],
-            [1, , , , 1]
-        ],
-        'N': [
-            [1, , , 1],
-            [1, 1, , 1],
-            [1, , 1, 1],
-            [1, , , 1],
-            [1, , , 1]
-        ],
-        'O': [
-            [1, 1, 1],
-            [1, , 1],
-            [1, , 1],
-            [1, , 1],
-            [1, 1, 1]
-        ],
-        'P': [
-            [1, 1, 1],
-            [1, , 1],
-            [1, 1, 1],
-            [1],
-            [1]
-        ],
-        'Q': [
-            [0, 1, 1],
-            [1, , , 1],
-            [1, , , 1],
-            [1, , 1, 1],
-            [1, 1, 1, 1]
-        ],
-        'R': [
-            [1, 1],
-            [1, , 1],
-            [1, , 1],
-            [1, 1],
-            [1, , 1]
-        ],
-        'S': [
-            [1, 1, 1],
-            [1],
-            [1, 1, 1],
-            [, , 1],
-            [1, 1, 1]
-        ],
-        'T': [
-            [1, 1, 1],
-            [, 1],
-            [, 1],
-            [, 1],
-            [, 1]
-        ],
-        'U': [
-            [1, , 1],
-            [1, , 1],
-            [1, , 1],
-            [1, , 1],
-            [1, 1, 1]
-        ],
-        'V': [
-            [1, , , , 1],
-            [1, , , , 1],
-            [, 1, , 1],
-            [, 1, , 1],
-            [, , 1]
-        ],
-        'W': [
-            [1, , , , 1],
-            [1, , , , 1],
-            [1, , , , 1],
-            [1, , 1, , 1],
-            [1, 1, 1, 1, 1]
-        ],
-        'X': [
-            [1, , , , 1],
-            [, 1, , 1],
-            [, , 1],
-            [, 1, , 1],
-            [1, , , , 1]
-        ],
-        'Y': [
-            [1, , 1],
-            [1, , 1],
-            [, 1],
-            [, 1],
-            [, 1]
-        ],
-        'Z': [
-            [1, 1, 1, 1, 1],
-            [, , , 1],
-            [, , 1],
-            [, 1],
-            [1, 1, 1, 1, 1]
-        ],
-        '0': [
-            [1, 1, 1],
-            [1, , 1],
-            [1, , 1],
-            [1, , 1],
-            [1, 1, 1]
-        ],
-        '1': [
-            [, 1],
-            [, 1],
-            [, 1],
-            [, 1],
-            [, 1]
-        ],
-        '2': [
-            [1,1,1],
-            [0,0,1],
-            [1,1,1],
-            [1,0,0],
-            [1,1,1]
-        ],
-        '3':[
-            [1,1,1],
-            [0,0,1],
-            [1,1,1],
-            [0,0,1],
-            [1,1,1]
-        ],
-        '4':[
-            [1,0,1],
-            [1,0,1],
-            [1,1,1],
-            [0,0,1],
-            [0,0,1]
-        ],
-        '5':[
-            [1,1,1],
-            [1,0,0],
-            [1,1,1],
-            [0,0,1],
-            [1,1,1]
-        ],
-        '6':[
-            [1,1,1],
-            [1,0,0],
-            [1,1,1],
-            [1,0,1],
-            [1,1,1]
-        ],
-        '7':[
-            [1,1,1],
-            [0,0,1],
-            [0,0,1],
-            [0,0,1],
-            [0,0,1]
-        ],
-        '8':[
-            [1,1,1],
-            [1,0,1],
-            [1,1,1],
-            [1,0,1],
-            [1,1,1]
-        ],
-        '9':[
-            [1,1,1],
-            [1,0,1],
-            [1,1,1],
-            [0,0,1],
-            [1,1,1]
-        ],
-        ':':[
-            [0,0,0],
-            [0,1,0],
-            [0,0,0],
-            [0,1,0],
-            [0,0,0]
-        ],
-        ' ': [
-            [, ,],
-            [, ,],
-            [, ,],
-            [, ,],
-            [, ,]
-        ]
-    };
-
-    function draw(string, size, color) {
-        var needed = [];
-        string = string.toUpperCase(); // because I only did uppercase letters
-        for (var i = 0; i < string.length; i++) {
-            var letter = letters[string.charAt(i)];
-            if (letter) { // because there's letters I didn't do
-                needed.push(letter);
-            }
-        }
-
-        context.fillStyle = color;
-        var currX = 0;
-        for (i = 0; i < needed.length; i++) {
-            letter = needed[i];
-            var currY = 0;
-            var addX = 0;
-            for (var y = 0; y < letter.length; y++) {
-                var row = letter[y];
-                for (var x = 0; x < row.length; x++) {
-                    if (row[x]) {
-                        context.fillRect(currX + x * size, currY, size, size);
-                    }
-                }
-                addX = Math.max(addX, row.length * size);
-                currY += size;
-            }
-            currX += size + addX;
-        }
-
-        //console.log('Drew ' + string + ' at ' + size);
-    }
-
-// Initialize music generation (player).
-  var t0 = new Date();
+  // Initialize music generation (player).
   var playerz = new CPlayer();
   playerz.init(song);
   var playerz_death = new CPlayer();
@@ -394,7 +93,7 @@ initKeys();
 initGamepad();
 
 let image = new Image();
-image.src = 'player_sheet_256.png'
+image.src = 'player_sheet_128.png'
 image.onload = function() {
     let spriteSheet = SpriteSheet({
         image: image,
@@ -407,12 +106,12 @@ image.onload = function() {
                 loop: true,
             },
             walk: {
-                frames: [8, 9, 10, 11],
+                frames: [4, 5, 6, 7],
                 frameRate: 30,
                 loop: true,
             },
             die: {
-                frames: 18,
+                frames: 10,
                 frameRate: 30,
                 loop: false,
             }
@@ -421,6 +120,7 @@ image.onload = function() {
 
     let player = Sprite({
   speed: 3,
+  isMoving: false,
   x: 360,        // starting x,y position of the sprite
   y: 240,
   anchor: {x: 0.5, y: 0.5},       // move the sprite 2px to the right every frame
@@ -430,18 +130,24 @@ image.onload = function() {
     let axisX = gamepadAxis('leftstickx', 0);
     let axisY = gamepadAxis('leftsticky', 0);
 
+    this.isMoving = false;
+
     if (axisX < -0.4 || keyPressed(['arrowleft', 'a'])) {
       this.x -= 1*this.speed;
+      this.isMoving = true;
     }
     else if (axisX > 0.4 || keyPressed(['arrowright', 'd'])) {
       this.x += 1*this.speed;
+      this.isMoving = true;
     }
 
     if (axisY < -0.4 || keyPressed(['arrowup', 'w'])) {
       this.y -= 1*this.speed;
+      this.isMoving = true;
     }
     else if (axisY > 0.4 || keyPressed(['arrowdown', 's'])) {
       this.y += 1*this.speed;
+      this.isMoving = true;
     }
 
     for(var i = 0; i < letterz.length; i++) {
@@ -470,11 +176,21 @@ image.onload = function() {
       }
     }
 
+    if (this.isMoving) {
+        if (this.currentAnimation.name != 'walk') {
+            this.playAnimation('walk');
+        }
+        
+    } else {
+        if (this.currentAnimation.name != 'idle') {
+            this.playAnimation('idle');
+        }
+    }
+
+    this.advance();
 
   }
 });
-
-    player.playAnimation('idle');
 
     let letterz = [];
 
@@ -495,10 +211,6 @@ function createLetter() {
     }
   });
   letterz.push(letter);
-}
-
-for(var i = 0; i < 6; i++) {
-  createLetter();
 }
 
 let levelz = Sprite({
@@ -562,7 +274,7 @@ function countDown() {
 }
 
 let loop = GameLoop({  // create the main game loop
-  update: function() { // update the game state
+  update: function(dt) { // update the game state
     if (player.isAlive()) {
         levelz.update();
         scorez.update();
@@ -617,16 +329,34 @@ let loop = GameLoop({  // create the main game loop
   }
 });
 
+new_game();
 loop.start();    // start the game
 
 function die() {
     player.ttl = 0;
+    player.playAnimation('die');
     letterz.filter(letter => { letter.ttl = 0; })
     audio.pause();
     audio.currentTime = 0;
     audio.src = death_wave_src;
     audio.loop = false;
     audio.play();
+};
+
+function new_game() {
+    level = 1;
+    levelz.content = 'Level: ' + level;
+    score = 0;
+    scorez.content = 'Score: ' + score;
+    timer = countdownStart;
+    timerz.content = 'Time Left: ' + timer;
+
+    for(var i = 0; i < 6; i++) {
+        createLetter();
+    }
+    player.x = canvasX/2;
+    player.y = canvasY/2;
+    player.ttl = Infinity;
 };
 
 function restart() {
@@ -640,6 +370,8 @@ function restart() {
     for(var i = 0; i < 6; i++) {
         createLetter();
     }
+    player.x = canvasX/2;
+    player.y = canvasY/2;
     player.ttl = Infinity;
     audio.src = song1_wave_src;
     audio.loop = loop;
