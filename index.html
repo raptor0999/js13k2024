@@ -208,9 +208,7 @@ function createLetter() {
   var insert = true;
 
   for (var i = 0; i < letterz.length; i++) {
-    if(letter.x < letterz[i].x - 20 && letter.x > letterz[i] + 20) {
-        break;
-    } else {
+    if(letter.x > letterz[i].x && letter.x < letterz[i].x + letterz[i].width + 10) {
         insert = false;
     }
   }
@@ -369,7 +367,7 @@ function new_game() {
     timer = countdownStart;
     timerz.content = 'Time Left: ' + timer;
 
-    for(var i = 0; i < 6; i++) {
+    for(var i = 0; i < 7; i++) {
         createLetter();
     }
     player.x = canvasX/2;
