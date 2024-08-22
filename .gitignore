@@ -1,0 +1,4 @@
+# Node.js project ignore file
+
+# Ignore npm dependencies
+node_modules/
