@@ -329,10 +329,17 @@ let timerz = Sprite({
     height: 20,        // move the sprite 2px to the right every frame
     update() {
       this.content = 'Time Left: ' + timer;
-      if (timer < 10) {
+      if (timer <= 10) {
         this.color = '#ff0000';
+        
+        if (timer <= 5) {
+            audio.playbackRate = 1.22;
+        } else {
+            audio.playbackRate = 1.11;
+        }
       } else {
         this.color = '#eeeeee';
+        audio.playbackRate = 1.0;
       }
     },
     render() {
@@ -427,6 +434,7 @@ function die() {
     letterz.filter(letter => { letter.ttl = 0; })
     audio.pause();
     audio.currentTime = 0;
+    audio.playbackRate = 1.0;
     audio.src = death_wave_src;
     audio.loop = false;
     audio.play();
@@ -447,6 +455,7 @@ function new_game() {
     player.y = canvasY/2;
     player.ttl = Infinity;
     game_started = true;
+    audio.playbackRate = 1.0;
     audio.src = song1_wave_src;
     audio.loop = true;
     audio.play();
@@ -466,6 +475,7 @@ function restart() {
     player.x = canvasX/2;
     player.y = canvasY/2;
     player.ttl = Infinity;
+    audio.playbackRate = 1.0;
     audio.src = song1_wave_src;
     audio.loop = loop;
     audio.play();
