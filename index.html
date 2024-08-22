@@ -277,6 +277,13 @@ let { canvas, context } = init();
             [0,0,1],
             [1,1,1]
         ],
+        ':':[
+            [0,0,0],
+            [0,1,0],
+            [0,0,0],
+            [0,1,0],
+            [0,0,0]
+        ],
         ' ': [
             [, ,],
             [, ,],
@@ -387,6 +394,10 @@ let player = Sprite({
       if(playerMidX >= lett.x && playerMidX <= lett.x + lett.width && playerMidY >= lett.y && playerMidY <= lett.y + lett.height) {
         ui.score += parseInt(lett.content);
         ui.content = 'Score: ' + ui.score;
+        if (ui.content.includes("13")) {
+            ui.score = 0;
+            ui.content = 'Score: ' + ui.score;
+        }
         lett.ttl = 0;
       }
     }
