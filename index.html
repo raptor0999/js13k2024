@@ -105,6 +105,7 @@ var canvasY = 480;
 var level = 1;
 var countdownStart = 15;
 var levelEndScore = 100;
+var level_win_amount = 14;
 var score = 0;
 var timer = countdownStart;
 var game_started = false;
@@ -145,6 +146,7 @@ image.onload = function() {
   isMoving: false,
   isPrimed: false,
   badShit: 0,
+  win: false,
   x: 360,        // starting x,y position of the sprite
   y: 240,
   anchor: {x: 0.5, y: 0.5},       // move the sprite 2px to the right every frame
@@ -191,6 +193,11 @@ image.onload = function() {
             levelz.content = 'Level: ' + level;
             level_audio.play();
             letter_fall_speed += 0.5;
+
+            if (level >= level_win_amount) {
+                win();
+                draw_win();
+            }
         }
         scorez.content = 'Score: ' + score;
 
@@ -397,6 +404,7 @@ let loop = GameLoop({  // create the main game loop
         if (game_started && (gamepadPressed('south') || keyPressed(['r', 'enter', 'space']))) {
             restart();
         }
+
         if (!game_started  && (gamepadPressed('south') || keyPressed(['r', 'enter', 'space']))) {
             new_game();
         }
@@ -419,7 +427,11 @@ let loop = GameLoop({  // create the main game loop
         timerz.render();
 
         if (!player.isAlive()) {
-            draw("GAME OVER", 12, 'red', 125, 200);
+            if (player.win) {
+                draw_win();
+            } else {
+                draw("GAME OVER", 12, 'red', 125, 200);
+            }
         }
     } else {
         draw_title();
@@ -433,6 +445,7 @@ loop.start();    // start the game
 
 function die() {
     player.ttl = 0;
+    player.win = false;
     player.playAnimation('die');
     letterz.filter(letter => { letter.ttl = 0; })
     audio.pause();
@@ -442,6 +455,23 @@ function die() {
     audio.loop = false;
     audio.play();
 };
+
+function win() {
+    player.ttl = 0;
+    player.win = true;
+    player.playAnimation('idle');
+    letterz.filter(letter => { letter.ttl = 0; })
+    audio.pause();
+    audio.currentTime = 0;
+    /*audio.playbackRate = 1.0;
+    audio.src = death_wave_src;
+    audio.loop = false;
+    audio.play();*/
+}
+
+function draw_win() {
+    draw("YOU WIN!", 12, 'red', 150, 200);
+}
 
 function new_game() {
     level = 1;
@@ -457,6 +487,7 @@ function new_game() {
     player.x = canvasX/2;
     player.y = canvasY/2;
     player.ttl = Infinity;
+    player.win = false;
     game_started = true;
     audio.playbackRate = 1.0;
     audio.src = song1_wave_src;
@@ -478,6 +509,7 @@ function restart() {
     player.x = canvasX/2;
     player.y = canvasY/2;
     player.ttl = Infinity;
+    player.win = false;
     audio.playbackRate = 1.0;
     audio.src = song1_wave_src;
     audio.loop = loop;
