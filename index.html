@@ -108,6 +108,7 @@ var levelEndScore = 100;
 var score = 0;
 var timer = countdownStart;
 var game_started = false;
+var player_speed = 3;
 
 initKeys();
 initGamepad();
@@ -139,8 +140,10 @@ image.onload = function() {
     });
 
     let player = Sprite({
-  speed: 3,
+  speed: player_speed,
   isMoving: false,
+  isPrimed: false,
+  badShit: 0,
   x: 360,        // starting x,y position of the sprite
   y: 240,
   anchor: {x: 0.5, y: 0.5},       // move the sprite 2px to the right every frame
@@ -189,6 +192,14 @@ image.onload = function() {
         }
         scorez.content = 'Score: ' + score;
 
+        if(primes.includes(score)) {
+            this.isPrimed = true;
+            doBadShit();
+        } else {
+            this.isPrimed = false;
+            reverseBadShit();
+        }
+
         lett.ttl = 0;
       }
     }
@@ -208,6 +219,39 @@ image.onload = function() {
 
   }
 });
+
+    function doBadShit() {
+        letterz = letterz.filter(letter => !letter.isAlive());
+        player.badShit = Math.floor((Math.random()*3)+1);
+
+        if (player.badShit == 1) {
+            player.speed = -player.speed;
+        }
+
+        if (player.badShit == 2) {
+            player.speed = 0.5;
+        }
+
+        if (player.badShit == 3) {
+            player.speed = 10;
+        }
+    }
+
+    function reverseBadShit() {
+        if (player.badShit == 1) {
+            player.speed = -player.speed;
+        }
+
+        if (player.badShit == 2) {
+            player.speed = player_speed;
+        }
+
+        if (player.badShit == 3) {
+            player.speed = player_speed;
+        }
+
+        player.badShit = 0;
+    }
 
     let letterz = [];
     let primes = [2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59,61,67,71,73,79,83,89,97];
@@ -265,7 +309,7 @@ let scorez = Sprite({
     width: 20,     // width and height of the sprite rectangle
     height: 20,        // move the sprite 2px to the right every frame
     update() {
-      if (primes.includes(score)) {
+      if (player.isPrimed) {
         this.color = '#ff0000';
       } else {
         this.color = '#eeeeee';
