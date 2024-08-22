@@ -5,7 +5,7 @@
   "main": "game.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "rollup -c"
+    "build": "rollup -c && del build\\index.zip && advzip -a build/index.zip build/*.* && forfiles /p c:\\users\\cgrif\\Documents\\js13k2024test2\\build /m index.zip /c \"cmd /c echo @fsize\""
   },
   "keywords": [],
   "author": "",
