@@ -53,9 +53,7 @@ let { canvas, context } = init();
       var wave = playerz.createWave();
       audio = document.createElement("audio");
       song1_wave_src = URL.createObjectURL(new Blob([wave], {type: "audio/wav"}));
-      audio.src = song1_wave_src;
-      audio.loop = true;
-      audio.play();
+      
     }
   });
 
@@ -206,7 +204,20 @@ function createLetter() {
       draw(this.content, 4, this.color);
     }
   });
-  letterz.push(letter);
+
+  var insert = true;
+
+  for (var i = 0; i < letterz.length; i++) {
+    if(letter.x < letterz[i].x - 20 && letter.x > letterz[i] + 20) {
+        break;
+    } else {
+        insert = false;
+    }
+  }
+
+  if (insert) {
+    letterz.push(letter);
+  }
 }
 
 let levelz = Sprite({
@@ -365,6 +376,9 @@ function new_game() {
     player.y = canvasY/2;
     player.ttl = Infinity;
     game_started = true;
+    audio.src = song1_wave_src;
+    audio.loop = true;
+    audio.play();
 };
 
 function restart() {
