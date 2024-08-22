@@ -109,6 +109,7 @@ var score = 0;
 var timer = countdownStart;
 var game_started = false;
 var player_speed = 3;
+var letter_fall_speed = 1;
 
 initKeys();
 initGamepad();
@@ -189,6 +190,7 @@ image.onload = function() {
             level += 1;
             levelz.content = 'Level: ' + level;
             level_audio.play();
+            letter_fall_speed += 0.5;
         }
         scorez.content = 'Score: ' + score;
 
@@ -260,7 +262,7 @@ image.onload = function() {
 function createLetter() {
   let letter = Sprite({
     content: Math.floor((Math.random()*8)+1).toString(),
-    speed: 1,
+    speed: letter_fall_speed,
     x: Math.floor(Math.random()*canvasX),        // starting x,y position of the sprite
     y: 0,
     color: '#eeeeee',  // fill color of the sprite rectangle
