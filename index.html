@@ -18,6 +18,9 @@ canvas {
 <script src="kontra.min.js"></script>
 <script src="player-small.js"></script>
 <script src="Javabox1.js"></script>
+<script src="https://sfxr.me/riffwave.js"></script>
+<script src="https://sfxr.me/sfxr.js"></script>
+<script src="sounds.js"></script>
 
 <script>
 let { init, Sprite, GameLoop, initKeys, keyPressed, initGamepad, gamepadPressed, gamepadAxis } = kontra
@@ -294,8 +297,6 @@ let { canvas, context } = init();
     };
 
     function draw(string, size, color) {
-        
-
         var needed = [];
         string = string.toUpperCase(); // because I only did uppercase letters
         for (var i = 0; i < string.length; i++) {
@@ -334,6 +335,7 @@ let { canvas, context } = init();
 
   // Generate music...
   var done = false;
+  var audio;
   setInterval(function () {
     if (done) {
       return;
@@ -347,15 +349,23 @@ let { canvas, context } = init();
 
       // Put the generated song in an Audio element.
       var wave = playerz.createWave();
-      var audio = document.createElement("audio");
+      audio = document.createElement("audio");
       audio.src = URL.createObjectURL(new Blob([wave], {type: "audio/wav"}));
       audio.loop = true;
       audio.play();
     }
   });
 
+var pickup_audio = sfxr.toAudio(pickup_sound);
+var level_audio = sfxr.toAudio(level_sound);
+
 var canvasX = 720;
 var canvasY = 480;
+var level = 1;
+var countdownStart = 5;
+var levelEndScore = 20;
+var score = 0;
+var timer = countdownStart;
 
 initKeys();
 initGamepad();
@@ -392,12 +402,22 @@ let player = Sprite({
       let lett = letterz[i];
 
       if(playerMidX >= lett.x && playerMidX <= lett.x + lett.width && playerMidY >= lett.y && playerMidY <= lett.y + lett.height) {
-        ui.score += parseInt(lett.content);
-        ui.content = 'Score: ' + ui.score;
-        if (ui.content.includes("13")) {
-            ui.score = 0;
-            ui.content = 'Score: ' + ui.score;
+        pickup_audio.play();
+        score += parseInt(lett.content);
+        timer += parseInt(lett.content);
+        
+        if (scorez.content.includes("13")) {
+            score = 0;
         }
+
+        if (score >= levelEndScore) {
+            score = 0;
+            level += 1;
+            levelz.content = 'Level: ' + level;
+            level_audio.play();
+        }
+        scorez.content = 'Score: ' + score;
+
         lett.ttl = 0;
       }
     }
@@ -429,11 +449,25 @@ for(var i = 0; i < 6; i++) {
   createLetter();
 }
 
-let ui = Sprite({
-    content: 'Score: ' + 0,
-    score: 0,
+let levelz = Sprite({
+    content: 'Level: ' + level,
     x: 5,        // starting x,y position of the sprite
     y: 5,
+    color: '#eeeeee',  // fill color of the sprite rectangle
+    width: 20,     // width and height of the sprite rectangle
+    height: 20,        // move the sprite 2px to the right every frame
+    update() {
+      
+    },
+    render() {
+      draw(this.content, 4, this.color);
+    }
+  });
+
+let scorez = Sprite({
+    content: 'Score: ' + score,
+    x: 5,        // starting x,y position of the sprite
+    y: 30,
     color: '#eeeeee',  // fill color of the sprite rectangle
     width: 20,     // width and height of the sprite rectangle
     height: 20,        // move the sprite 2px to the right every frame
@@ -449,36 +483,71 @@ let ui = Sprite({
     }
   });
 
+let timerz = Sprite({
+    content: 'Time Left: ' + timer,
+    x: 5,        // starting x,y position of the sprite
+    y: 55,
+    color: '#eeeeee',  // fill color of the sprite rectangle
+    width: 20,     // width and height of the sprite rectangle
+    height: 20,        // move the sprite 2px to the right every frame
+    update() {
+      this.content = 'Time Left: ' + timer;
+      if (timer < 10) {
+        this.color = '#FF0000';
+      } else {
+        this.color = '#eeeeee';
+      }
+    },
+    render() {
+      draw(this.content, 4, this.color);
+    }
+  });
+
+setInterval(countDown, 1000);
+
+function countDown() {
+    timer -= 1;
+}
+
 let loop = GameLoop({  // create the main game loop
   update: function() { // update the game state
-    ui.update();
-    player.update();
+    if (player.isAlive()) {
+        levelz.update();
+        scorez.update();
+        timerz.update();
+        player.update();
 
-    // wrap the sprites position when it reaches
-    // the edge of the screen
-    if (player.x > canvas.width) {
-      player.x = 0;
+        // wrap the sprites position when it reaches
+        // the edge of the screen
+        if (player.x > canvas.width) {
+          player.x = 0;
+        }
+        if (player.x < 0) {
+          player.x = canvas.width;
+        }
+
+        letterz.map(letter => {
+          letter.update();
+
+          if (letter.y + letter.height > canvasY) {
+            letter.ttl = 0;
+          }
+        });
+
+        letterz = letterz.filter(letter => letter.isAlive());
+        if (letterz.length < 1) {
+          for(var i = 0; i < 6; i++) {
+            createLetter();
+          }
+        }
+
+        if (timer < 1) {
+            player.ttl = 0;
+            audio.pause();
+        }
+
+        scorez.update();
     }
-    if (player.x < 0) {
-      player.x = canvas.width;
-    }
-
-    letterz.map(letter => {
-      letter.update();
-
-      if (letter.y + letter.height > canvasY) {
-        letter.ttl = 0;
-      }
-    });
-
-    letterz = letterz.filter(letter => letter.isAlive());
-    if (letterz.length < 1) {
-      for(var i = 0; i < 6; i++) {
-        createLetter();
-      }
-    }
-
-    ui.update();
   },
   render: function() { // render the game state
     player.render();
@@ -486,7 +555,10 @@ let loop = GameLoop({  // create the main game loop
     letterz.map(letter => {
       letter.render();
     });
-    ui.render();
+
+    levelz.render();
+    scorez.render();
+    timerz.render();
   }
 });
 
