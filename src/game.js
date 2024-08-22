@@ -174,6 +174,7 @@ var timer = countdownStart;
 var second_counter = 0;
 var game_started = false;
 var level_score_calculating = false;
+var mid_boss_time = false;
 var final_boss_time = false;
 var player_speed = 3;
 var letter_spawn_time = 1.0;
@@ -356,6 +357,10 @@ image.onload = function() {
             // generate a random powerup
             createPowerUp(powerups[Math.floor((Math.random()*powerups.length))]);
           }
+        }
+
+        if(e.type == 'mid_boss_shot' && rectCollide(this, e)) {
+          die();
         }
 
         if(e.type == 'final_boss_shot' && rectCollide(this, e)) {
@@ -657,7 +662,10 @@ function createMidBoss() {
     update() {
       this.currentShotTime += 1;
       if(this.currentShotTime > this.shotTimer) {
-        createMidBossShot(this.x, this.y);
+        createMidBossShot(this.x, this.y, -1, -1);
+        createMidBossShot(this.x, this.y, -1, 1);
+        createMidBossShot(this.x, this.y, 1, -1);
+        createMidBossShot(this.x, this.y, 1, 1);
         this.currentShotTime = 0;
       }
 
@@ -684,7 +692,7 @@ function createMidBoss() {
       }
 
       // move towards player somewhat
-      if (this.x < player.x) {
+      /*if (this.x < player.x) {
         this.x += 1*this.speed;
       }
       if (this.x > player.x) {
@@ -695,7 +703,7 @@ function createMidBoss() {
       }
       if (this.y > player.y) {
         this.y -= 1*this.speed;
-      }
+      }*/
 
       // make sure doesn't go off screen
       if (this.x < 0) {
@@ -840,6 +848,35 @@ function createEnemyShot(x, y) {
   });
 
   enemies.push(enemyShot);
+}
+
+function createMidBossShot(finalBossX, finalBossY, moveX, moveY) {
+  let midBossShot = Sprite({
+    type: 'mid_boss_shot',
+    moveX: moveX,
+    moveY: moveY,
+    ttl: 180,
+    content: '7',
+    speed: 3,
+    isMoving: false,
+    x: finalBossX,        // starting x,y position of the sprite
+    y: finalBossY,
+    anchor: {x: 0.5, y: 0.5},
+    color: 'orange',  // fill color of the sprite rectangle
+    width: 10,     // width and height of the sprite rectangle
+    height: 10,        // move the sprite 2px to the right every frame
+    update(dt) {
+      this.rotation += 0.1;
+
+      this.x += moveX;
+      this.y += moveY;
+    },
+    render() {
+      draw(context, this.content, 4, this.color);
+    }
+  });
+
+  enemies.push(midBossShot);
 }
 
 function createFinalBossShot(finalBossX, finalBossY) {
@@ -1083,6 +1120,7 @@ let loop = GameLoop({  // create the main game loop
             if (level == 7) {
               audio.playbackRate = 1.0;
               switchTrack(song2_wave_src);
+              createMidBoss();
             } else {
               audio.playbackRate += 0.1;
               audio.currentTime = 0.0;
@@ -1112,6 +1150,11 @@ let loop = GameLoop({  // create the main game loop
 
     if(gamepadPressed('select') || keyPressed(['m'])) {
         audio.muted = !audio.muted;
+    }
+
+    if(keyPressed(['n']) && !mid_boss_time) {
+      mid_boss_time = true;
+      createMidBoss();
     }
 
     if(keyPressed(['b']) && !final_boss_time) {
@@ -1264,6 +1307,7 @@ function draw_win() {
 
 function new_game() {
     final_boss_time = false;
+    mid_boss_time = false;
     level = 1;
     levelEndScore = 100;
     levelz.content = 'Level: ' + level;
@@ -1306,6 +1350,7 @@ function restart() {
       audio.loop = true;
       audio.play();
     } else {
+      mid_boss_time = false;
       final_boss_time = false;
       level = 1;
       levelz.content = 'Level: ' + level;
