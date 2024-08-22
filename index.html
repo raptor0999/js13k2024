@@ -18,12 +18,13 @@ canvas {
 <script src="kontra.min.js"></script>
 <script src="player-small.js"></script>
 <script src="Javabox1.js"></script>
+<script src="SoundboxDeath.js"></script>
 <script src="https://sfxr.me/riffwave.js"></script>
 <script src="https://sfxr.me/sfxr.js"></script>
 <script src="sounds.js"></script>
 
 <script>
-let { init, Sprite, GameLoop, initKeys, keyPressed, initGamepad, gamepadPressed, gamepadAxis } = kontra
+let { init, Sprite, SpriteSheet, GameLoop, initKeys, keyPressed, initGamepad, gamepadPressed, gamepadAxis } = kontra
 
 let { canvas, context } = init();
 
@@ -332,6 +333,11 @@ let { canvas, context } = init();
   var t0 = new Date();
   var playerz = new CPlayer();
   playerz.init(song);
+  var playerz_death = new CPlayer();
+  playerz_death.init(death_song);
+  var death_wave;
+  var song1_wave_src;
+  var death_wave_src;
 
   // Generate music...
   var done = false;
@@ -350,9 +356,26 @@ let { canvas, context } = init();
       // Put the generated song in an Audio element.
       var wave = playerz.createWave();
       audio = document.createElement("audio");
-      audio.src = URL.createObjectURL(new Blob([wave], {type: "audio/wav"}));
+      song1_wave_src = URL.createObjectURL(new Blob([wave], {type: "audio/wav"}));
+      audio.src = song1_wave_src;
       audio.loop = true;
       audio.play();
+    }
+  });
+
+  var done_death = false
+  playerz_death.init(death_song);
+
+  setInterval(function () {
+    if (done_death) {
+      return;
+    }
+
+    done_death = playerz_death.generate() >= 1;
+
+    if (done_death) {
+      death_wave = playerz_death.createWave();
+      death_wave_src = URL.createObjectURL(new Blob([death_wave], {type: "audio/wav"}));
     }
   });
 
@@ -370,13 +393,38 @@ var timer = countdownStart;
 initKeys();
 initGamepad();
 
-let player = Sprite({
+let image = new Image();
+image.src = 'player_sheet_256.png'
+image.onload = function() {
+    let spriteSheet = SpriteSheet({
+        image: image,
+        frameWidth: 32,
+        frameHeight: 32,
+        animations: {
+            idle: {
+                frames: [0, 1, 2],
+                frameRate: 30,
+                loop: true,
+            },
+            walk: {
+                frames: [8, 9, 10, 11],
+                frameRate: 30,
+                loop: true,
+            },
+            die: {
+                frames: 18,
+                frameRate: 30,
+                loop: false,
+            }
+        }
+    });
+
+    let player = Sprite({
   speed: 3,
-  x: 100,        // starting x,y position of the sprite
-  y: 80,
-  color: '#eeeeee',  // fill color of the sprite rectangle
-  width: 20,     // width and height of the sprite rectangle
-  height: 20,        // move the sprite 2px to the right every frame
+  x: 360,        // starting x,y position of the sprite
+  y: 240,
+  anchor: {x: 0.5, y: 0.5},       // move the sprite 2px to the right every frame
+  animations: spriteSheet.animations,
   update() {
     // check the axis of the gamepad connected to index 0
     let axisX = gamepadAxis('leftstickx', 0);
@@ -397,8 +445,8 @@ let player = Sprite({
     }
 
     for(var i = 0; i < letterz.length; i++) {
-      var playerMidX = this.x + this.width/2;
-      var playerMidY = this.y + this.height/2;
+      var playerMidX = this.x;
+      var playerMidY = this.y;
       let lett = letterz[i];
 
       if(playerMidX >= lett.x && playerMidX <= lett.x + lett.width && playerMidY >= lett.y && playerMidY <= lett.y + lett.height) {
@@ -421,10 +469,14 @@ let player = Sprite({
         lett.ttl = 0;
       }
     }
+
+
   }
 });
 
-let letterz = [];
+    player.playAnimation('idle');
+
+    let letterz = [];
 
 function createLetter() {
   let letter = Sprite({
@@ -542,11 +594,14 @@ let loop = GameLoop({  // create the main game loop
         }
 
         if (timer < 1) {
-            player.ttl = 0;
-            audio.pause();
+            die();
         }
 
         scorez.update();
+    } else {
+        if (gamepadPressed('south') || keyPressed(['r', 'enter', 'space'])) {
+            restart();
+        }
     }
   },
   render: function() { // render the game state
@@ -563,6 +618,39 @@ let loop = GameLoop({  // create the main game loop
 });
 
 loop.start();    // start the game
+
+function die() {
+    player.ttl = 0;
+    letterz.filter(letter => { letter.ttl = 0; })
+    audio.pause();
+    audio.currentTime = 0;
+    audio.src = death_wave_src;
+    audio.loop = false;
+    audio.play();
+};
+
+function restart() {
+    level = 1;
+    levelz.content = 'Level: ' + level;
+    score = 0;
+    scorez.content = 'Score: ' + score;
+    timer = countdownStart;
+    timerz.content = 'Time Left: ' + timer;
+
+    for(var i = 0; i < 6; i++) {
+        createLetter();
+    }
+    player.ttl = Infinity;
+    audio.src = song1_wave_src;
+    audio.loop = loop;
+    audio.play();
+};
+
+};
+
+
+
+
 
 </script>
 </body>
