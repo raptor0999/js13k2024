@@ -855,7 +855,7 @@ let scorep = Sprite({
       if (score > 9) {
         this.x = -10;
       } else {
-        this.x = 3;
+        this.x = -3;
       }
 
       if (player.isPrimed) {
