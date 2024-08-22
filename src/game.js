@@ -640,6 +640,85 @@ function generateEnemyContent(type) {
   }
 }
 
+function createMidBoss() {
+  let midBoss = Sprite({
+    type: 'mid_boss',
+    shotTimer: 120,
+    currentShotTime: 0,
+    content: 'PR1M3',
+    speed: 1,
+    isMoving: false,
+    x: Math.floor(Math.random()*canvas.width),        // starting x,y position of the sprite
+    y: Math.floor(Math.random()*canvas.height),
+    anchor: {x: 0.5, y: 0.5},
+    color: 'yellow',  // fill color of the sprite rectangle
+    width: 100,     // width and height of the sprite rectangle
+    height: 20,        // move the sprite 2px to the right every frame
+    update() {
+      this.currentShotTime += 1;
+      if(this.currentShotTime > this.shotTimer) {
+        createMidBossShot(this.x, this.y);
+        this.currentShotTime = 0;
+      }
+
+      var moveX = Math.floor(Math.random()*2);
+      var moveY = Math.floor(Math.random()*2);
+
+      // random movement
+      if (moveX == 0) {
+        this.x -= 3*this.speed;
+        this.isMoving = true;
+      }
+      else if (moveX == 1) {
+        this.x += 3*this.speed;
+        this.isMoving = true;
+      }
+
+      if (moveY == 0) {
+        this.y -= 3*this.speed;
+        this.isMoving = true;
+      }
+      else if (moveY == 1) {
+        this.y += 3*this.speed;
+        this.isMoving = true;
+      }
+
+      // move towards player somewhat
+      if (this.x < player.x) {
+        this.x += 1*this.speed;
+      }
+      if (this.x > player.x) {
+        this.x -= 1*this.speed;
+      }
+      if (this.y < player.y) {
+        this.y += 1*this.speed;
+      }
+      if (this.y > player.y) {
+        this.y -= 1*this.speed;
+      }
+
+      // make sure doesn't go off screen
+      if (this.x < 0) {
+        this.x = 0;
+      }
+      if (this.x > canvas.width) {
+        this.x = canvas.width;
+      }
+      if (this.y < 0) {
+        this.y = 0;
+      }
+      if (this.y > canvas.height) {
+        this.y = canvas.height;
+      }
+    },
+    render() {
+      draw(context, this.content, 6, this.color);
+    }
+  });
+
+  enemies.push(midBoss);
+}
+
 function createFinalBoss() {
   let finalBoss = Sprite({
     type: 'final_boss',
