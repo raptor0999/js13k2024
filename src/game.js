@@ -369,10 +369,12 @@ var current_letter_spawn_time = 0.0;
 var letter_fall_speed = 1;
 var powerup_fall_speed = 1;
 let powerups = [];
-let magnet = {effect:'magnet', color: 'green'};
-let thrust = {effect:'thrust', color: 'orange'};
-powerups.push(magnet);
-powerups.push(thrust);
+powerups.push({effect:'magnet_range', content: 'U', color: 'cyan'});
+powerups.push({effect:'magnet_speed_mult', content: 'U', color: 'green'});
+powerups.push({effect:'thrust_time', content: 'T', color: 'orange'});
+powerups.push({effect:'thrust_refresh_time', content: 'T', color: 'brown'});
+powerups.push({effect:'thrust_mult', content: 'T', color: 'green'});
+powerups.push({effect:'player_speed', content: 'S', color: 'green'});
 let letterz = [];
 let primes = [];
 let dubz = [];
@@ -417,8 +419,14 @@ image.onload = function() {
   badShit: 0,
   win: false,
   magnetRange: 32, // in pixels, including player 32x32 sprite
-  thrustingMult: 1.0,
+  magnetSpeedMult: 1.0,
+  thrustMult: 1.0,
+  thrustRefreshTime: 0.5,
+  currentThrustRefreshTime: 0.0,
+  thrustTime: 0.3,
+  currentThurstTime: 0.0,
   isThrusting: false,
+  isThrustRefreshing: false,
   x: 360,        // starting x,y position of the sprite
   y: 240,
   anchor: {x: 0.5, y: 0.5},       // move the sprite 2px to the right every frame
@@ -447,6 +455,26 @@ image.onload = function() {
     else if (axisY > 0.4 || keyPressed(['arrowdown', 's'])) {
       this.y += 1*this.speed;
       this.isMoving = true;
+    }
+
+    if(this.isThrusting) {
+      if (this.currentThurstTime > this.thrustTime) {
+        this.isThrusting = false;
+        this.isThrustRefreshing = true;
+        this.speed = player_speed;
+        this.currentThurstTime = 0.0;
+      } else {
+        this.currentThurstTime += 1/60;
+      }
+    }
+
+    if(this.isThrustRefreshing) {
+      if (this.currentThrustRefreshTime > this.thrustRefreshTime) {
+        this.isThrustRefreshing = false;
+        this.currentThrustRefreshTime = 0.0;
+      } else {
+        this.currentThrustRefreshTime += 1/60;
+      }
     }
 
     
@@ -502,7 +530,6 @@ image.onload = function() {
               // generate a random powerup
               createPowerUp(powerups[Math.floor((Math.random()*powerups.length))]);
               dubz = dubz.filter(d => d != score);
-              console.log(dubz);
             }
           }
 
@@ -540,16 +567,16 @@ image.onload = function() {
            if(lett.y >= this.y - this.magnetRange && lett.y <= this.y + this.magnetRange) {
               // we are within magnet range!
               if(lett.x > this.x) {
-                lett.x -= 1;
+                lett.x -= 1*this.magnetSpeedMult;
               }
               if(lett.x < this.x) {
-                lett.x += 1;
+                lett.x += 1*this.magnetSpeedMult;
               }
               if(lett.y > this.y) {
-                lett.y -= 1;
+                lett.y -= 1*this.magnetSpeedMult;
               }
               if(lett.y < this.y) {
-                lett.y += 1;
+                lett.y += 1*this.magnetSpeedMult;
               }
            }
         }
@@ -593,7 +620,6 @@ image.onload = function() {
             // generate a random powerup
             createPowerUp(powerups[Math.floor((Math.random()*powerups.length))]);
             dubz = dubz.filter(d => d != score);
-            console.log(dubz);
           }
         }
 
@@ -705,21 +731,24 @@ function reverseBadShit() {
     player.badShit = 0;
 }
 
-function createLetter() {
+function createLetter(dirX = 0, dirY = 1, x = Math.floor(Math.random()*canvas.width), y = 0) {
   let letter = Sprite({
     type: 'letter',
+    dirX: dirX,
+    dirY: dirY,
     content: Math.floor((Math.random()*8)+1).toString(),
     speed: letter_fall_speed,
-    x: Math.floor(Math.random()*canvas.width),        // starting x,y position of the sprite
-    y: 0,
+    x: x,        // starting x,y position of the sprite
+    y: y,
     anchor: {x: 0.5, y: 0.5},
     color: '#eeeeee',  // fill color of the sprite rectangle
     width: 20,     // width and height of the sprite rectangle
     height: 20,        // move the sprite 2px to the right every frame
     update() {
-      this.y += 1*this.speed;
+      this.x += dirX*this.speed;
+      this.y += dirY*this.speed;
 
-      if (this.y > canvas.height) {
+      if (this.y < 0 || this.y > canvas.height || this.x < 0 || this.x > canvas.width) {
         this.ttl = 0;
       }
     },
@@ -735,7 +764,7 @@ function createPowerUp(p) {
   let powerup = Sprite({
     type: 'powerup',
     effect: p.effect,
-    content: powerupContent(p.effect),
+    content: p.content,
     speed: powerup_fall_speed,
     x: Math.floor(Math.random()*canvas.width),        // starting x,y position of the sprite
     y: 0,
@@ -767,24 +796,6 @@ function createPowerUp(p) {
   });
 
   letterz.push(powerup);
-}
-
-function powerupContent(effect) {
-  if (effect == 'magnet') {
-    return 'U';
-  }
-  if (effect == 'thrust') {
-    return 'I'
-  }
-}
-
-function awardPowerup(effect) {
-  if (effect == 'magnet') {
-    player.magnetRange += 8;
-  }
-  if (effect == 'thrust') {
-    player.thrustingMult += 0.2;
-  }
 }
 
 function createEnemy(type, speed, scoreDamage) {
@@ -1295,7 +1306,30 @@ let loop = GameLoop({  // create the main game loop
         }
 
         if (current_letter_spawn_time > letter_spawn_time) {
-          createLetter();
+          if (level < 3) {
+            createLetter();
+          } else if (level >= 3 && level < 8) {
+            var temp = Math.floor(Math.random()*2);
+            if (temp == 0) {
+              createLetter(0, 1)
+            } else {
+              createLetter(0, -1, Math.floor(Math.random()*canvas.width), canvas.height);
+            }
+          } else if (level >= 8 && level < 11) {
+            var temp = Math.floor(Math.random()*4);
+            if (temp == 0) {
+              createLetter(0, 1)
+            } 
+            if (temp == 1) {
+              createLetter(0, -1, Math.floor(Math.random()*canvas.width), canvas.height)
+            }
+            if (temp == 2) {
+              createLetter(1, 0, 0, Math.floor(Math.random()*canvas.height))
+            } 
+            if (temp == 3) {
+              createLetter(-1, 0, canvas.width, Math.floor(Math.random()*canvas.height))
+            }
+          }
           current_letter_spawn_time = 0.0;
         }
 
@@ -1466,29 +1500,31 @@ onKey('rightbracket', function(e) {
 
 // player thrust
 onKey('leftshift', function(e) {
-  if (!player.isThrusting && !player.isPrimed) {
+  if (!player.isThrusting && !player.isThrustRefreshing && !player.isPrimed) {
     player.isThrusting = true;
-    player.speed = player_speed * player.thrustingMult;
+    player.speed = player_speed * player.thrustMult;
   }
 });
 
 onKey('leftshift', function(e) {
   if (player.isThrusting) {
     player.isThrusting = false;
+    player.isThrustRefreshing = true;
     player.speed = player_speed;
   }
 }, {handler: 'keyup'});
 
 onGamepad('west', function(e) {
-  if (!player.isThrusting && !player.isPrimed) {
+  if (!player.isThrusting && !player.isThrustRefreshing && !player.isPrimed) {
     player.isThrusting = true;
-    player.speed = player_speed * player.thrustingMult;
+    player.speed = player_speed * player.thrustMult;
   }
 });
 
 onGamepad('west', function(e) {
   if (player.isThrusting) {
     player.isThrusting = false;
+    player.isThrustRefreshing = true;
     player.speed = player_speed;
   }
 }, {handler: 'gamepadup'});
@@ -1591,7 +1627,7 @@ function new_game() {
   enemies = enemies.filter(e => !e.isAlive());
 
   player.x = canvas.width/2;
-  player.y = canvas.height/2;
+  player.y = canvas.height/2+canvas.height/4;
   player.ttl = Infinity;
   player.win = false;
   game_started = true;
@@ -1608,7 +1644,7 @@ function restart() {
     
   if (final_boss_time) {
     player.x = canvas.width/2;
-    player.y = canvas.height/2;
+    player.y = canvas.height/2+canvas.height/4;
     player.ttl = Infinity;
     player.win = false;
     audio.position = 0.0;
@@ -1635,8 +1671,8 @@ function restart() {
 
     enemies = enemies.filter(e => !e.isAlive());
 
-    player.x = canvas.width/2;
-    player.y = canvas.height/2;
+    player.x = canvas.width/2+canvas.height/4;
+    player.y = canvas.height/2+canvas.height/4;
     player.ttl = Infinity;
     player.win = false;
     audio.playbackRate = 1.0;
@@ -1648,6 +1684,28 @@ function restart() {
 
 function draw_title() {
     draw(context, "PRIMONUMEROPHOBIA", 9, 'red', 340, 300);
+}
+
+function awardPowerup(effect) {
+  if (effect == 'magnet_range') {
+    player.magnetRange += 4;
+  }
+  if (effect == 'magnet_speed_mult') {
+    player.magnetSpeedMult += 0.1;
+  }
+  if (effect == 'thrust_time') {
+    player.thrustTime += 0.1;
+  }
+  if (effect == 'thrust_refresh_time') {
+    player.thrustRefreshTime -= 0.05;
+  }
+  if (effect == 'thrust_mult') {
+    player.thrustMult += 0.1;
+  }
+  if (effect == 'player_speed') {
+    player_speed += 0.1;
+    player.speed = player_speed;
+  }
 }
 
 };
