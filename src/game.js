@@ -1,7 +1,5 @@
 import { init, Sprite, SpriteSheet, GameLoop, initKeys, keyMap, onKey, keyPressed, initGamepad, onGamepad, gamepadPressed, gamepadAxis } from 'kontra'
 let { canvas, context } = init();
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
 
   // Initialize music generation (player).
   var m_game1 = new CPlayer();
@@ -19,6 +17,7 @@ canvas.height = window.innerHeight;
   var s_lz1 = new CPlayer();
   var s_dr1 = new CPlayer();
   var s_dr2 = new CPlayer();
+  var s_dr3 = new CPlayer();
   var s_b1 = new CPlayer();
   var s_lu1 = new CPlayer();
 
@@ -37,6 +36,7 @@ canvas.height = window.innerHeight;
   var lz1_src;
   var dr1_src;
   var dr2_src;
+  var dr3_src;
   var b1_src;
   var lu1_src;
 
@@ -319,6 +319,22 @@ canvas.height = window.innerHeight;
     }
   });
 
+  var done_dr3 = false
+  s_dr3.init(dr3);
+
+  setInterval(function () {
+    if (done_dr3) {
+      return;
+    }
+
+    done_dr3 = s_dr3.generate() >= 1;
+
+    if (done_dr3) {
+      var w = s_dr3.createWave();
+      dr3_src = URL.createObjectURL(new Blob([w], {type: "audio/wav"}));
+    }
+  });
+
   var done_b1 = false
   s_b1.init(b1);
 
@@ -357,6 +373,9 @@ let magnet = {effect:'magnet', color: 'green'};
 let thrust = {effect:'thrust', color: 'orange'};
 powerups.push(magnet);
 powerups.push(thrust);
+let letterz = [];
+let primes = [];
+let dubz = [];
 let enemies = [];
 let ui = [];
 
@@ -470,19 +489,20 @@ image.onload = function() {
             scorez.content = 'Score: ' + score;
 
             if(primes.includes(score)) {
-                this.isPrimed = true;
-                playSound(sound2, dr1_src);
-                this.isThrusting = false;
                 reverseBadShit();
+                this.isPrimed = true;
+                this.isThrusting = false;
                 doBadShit();
             } else {
-                this.isPrimed = false;
                 reverseBadShit();
+                this.isPrimed = false;
             }
 
             if(dubz.includes(score)) {
               // generate a random powerup
               createPowerUp(powerups[Math.floor((Math.random()*powerups.length))]);
+              dubz = dubz.filter(d => d != score);
+              console.log(dubz);
             }
           }
 
@@ -560,19 +580,20 @@ image.onload = function() {
           }
 
           if(primes.includes(score)) {
-              this.isPrimed = true;
-              playSound(sound2, dr1_src);
-              this.isThrusting = false;
               reverseBadShit();
+              this.isPrimed = true;
+              this.isThrusting = false;
               doBadShit();
           } else {
-              this.isPrimed = false;
               reverseBadShit();
+              this.isPrimed = false;
           }
 
           if(dubz.includes(score)) {
             // generate a random powerup
             createPowerUp(powerups[Math.floor((Math.random()*powerups.length))]);
+            dubz = dubz.filter(d => d != score);
+            console.log(dubz);
           }
         }
 
@@ -612,8 +633,8 @@ function rectCollide(rect1, rect2) {
 }
 
 function playSound(element, src) {
-    element.src = src;
-    element.play();
+  element.src = src;
+  element.play();
 }
 
 function switchTrack(track) {
@@ -648,7 +669,7 @@ function previousMusicTrack() {
 }
 
 function doBadShit() {
-    
+    playSound(sound2, dr1_src);
     player.badShit = Math.floor((Math.random()*3)+1);
 
     if (player.badShit == 1) {
@@ -665,6 +686,10 @@ function doBadShit() {
 }
 
 function reverseBadShit() {
+    if (player.isPrimed) {
+      playSound(sound2, dr3_src);
+    }
+
     if (player.badShit == 1) {
         player.speed = -player.speed;
     }
@@ -679,10 +704,6 @@ function reverseBadShit() {
 
     player.badShit = 0;
 }
-
-    let letterz = [];
-    let primes = [2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59,61,67,71,73,79,83,89,97];
-    let dubz = [11,22,33,44,55,66,77,88,99];
 
 function createLetter() {
   let letter = Sprite({
@@ -1339,6 +1360,8 @@ let loop = GameLoop({  // create the main game loop
             // start new level, clear field
             enemies = enemies.filter(enemy => { !enemy.isAlive(); });
             letterz = letterz.filter(letter => { !letter.isAlive(); });
+            primes = [2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59,61,67,71,73,79,83,89,97];
+            dubz = [11,22,33,44,55,66,77,88,99];
 
             level_score_calculating = false;
             score = 0;
@@ -1517,44 +1540,86 @@ setInterval(function () {
 });
 
 draw_title();
-title();
 loop.start();    // start the game
 
 function die() {
-    player.ttl = 0;
-    player.win = false;
-    player.playAnimation('die');
-    letterz.filter(letter => { letter.ttl = 0; });
-    audio.pause();
-    audio.currentTime = 0;
-    audio.playbackRate = 1.0;
-    audio.src = dr2_src;
-    audio.loop = false;
-    audio.play();
+  player.ttl = 0;
+  player.win = false;
+  player.playAnimation('die');
+  letterz.filter(letter => { letter.ttl = 0; });
+  audio.pause();
+  audio.currentTime = 0;
+  audio.playbackRate = 1.0;
+  audio.src = dr2_src;
+  audio.loop = false;
+  audio.play();
 };
 
 function win() {
-    player.ttl = 0;
-    player.win = true;
-    player.playAnimation('idle');
-    letterz.filter(letter => { letter.ttl = 0; });
-    audio.pause();
-    audio.currentTime = 0;
-    /*audio.playbackRate = 1.0;
-    audio.src = death_wave_src;
-    audio.loop = false;
-    audio.play();*/
+  player.ttl = 0;
+  player.win = true;
+  player.playAnimation('idle');
+  letterz.filter(letter => { letter.ttl = 0; });
+  audio.pause();
+  audio.currentTime = 0;
 }
 
 function draw_win() {
-    draw(context, "YOU WIN!", 12, 'red', 150, 200);
+  draw(context, "YOU WIN!", 12, 'red', 150, 200);
 }
 
 function new_game() {
-    final_boss_time = false;
+  final_boss_time = false;
+  mid_boss_time = false;
+  primes = [2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59,61,67,71,73,79,83,89,97];
+  dubz = [11,22,33,44,55,66,77,88,99];
+  level = 1;
+  levelEndScore = 100;
+  levelz.content = 'Level: ' + level;
+  score = 0;
+  scorez.content = 'Score: ' + score;
+  total_score = 0;
+  totalscorez.content = 'Total: ' + total_score;
+  timer = countdownStart;
+  second_counter = 0;
+  timerz.content = 'Time Left: ' + timer;
+
+  ui.push(levelz);
+  ui.push(scorez);
+  ui.push(timerz);
+
+  enemies = enemies.filter(e => !e.isAlive());
+
+  player.x = canvas.width/2;
+  player.y = canvas.height/2;
+  player.ttl = Infinity;
+  player.win = false;
+  game_started = true;
+  audio.position = 0.0;
+  audio.playbackRate = 1.0;
+  audio.src = m_game1_src;
+  audio.loop = true;
+  audio.play();
+};
+
+function restart() {
+  primes = [2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59,61,67,71,73,79,83,89,97];
+  dubz = [11,22,33,44,55,66,77,88,99];
+    
+  if (final_boss_time) {
+    player.x = canvas.width/2;
+    player.y = canvas.height/2;
+    player.ttl = Infinity;
+    player.win = false;
+    audio.position = 0.0;
+    audio.playbackRate = 1.0;
+    audio.src = m_boss_src;
+    audio.loop = true;
+    audio.play();
+  } else {
     mid_boss_time = false;
+    final_boss_time = false;
     level = 1;
-    levelEndScore = 100;
     levelz.content = 'Level: ' + level;
     score = 0;
     scorez.content = 'Score: ' + score;
@@ -1574,63 +1639,15 @@ function new_game() {
     player.y = canvas.height/2;
     player.ttl = Infinity;
     player.win = false;
-    game_started = true;
-    audio.position = 0.0;
     audio.playbackRate = 1.0;
     audio.src = m_game1_src;
-    audio.loop = true;
+    audio.loop = loop;
     audio.play();
+  }
 };
-
-function restart() {
-    
-    if (final_boss_time) {
-      player.x = canvas.width/2;
-      player.y = canvas.height/2;
-      player.ttl = Infinity;
-      player.win = false;
-      audio.position = 0.0;
-      audio.playbackRate = 1.0;
-      audio.src = m_boss_src;
-      audio.loop = true;
-      audio.play();
-    } else {
-      mid_boss_time = false;
-      final_boss_time = false;
-      level = 1;
-      levelz.content = 'Level: ' + level;
-      score = 0;
-      scorez.content = 'Score: ' + score;
-      total_score = 0;
-      totalscorez.content = 'Total: ' + total_score;
-      timer = countdownStart;
-      second_counter = 0;
-      timerz.content = 'Time Left: ' + timer;
-
-      ui.push(levelz);
-      ui.push(scorez);
-      ui.push(timerz);
-
-      enemies = enemies.filter(e => !e.isAlive());
-
-      player.x = canvas.width/2;
-      player.y = canvas.height/2;
-      player.ttl = Infinity;
-      player.win = false;
-      audio.playbackRate = 1.0;
-      audio.src = m_game1_src;
-      audio.loop = loop;
-      audio.play();
-    }
-    
-};
-
-function title() {
-    
-}
 
 function draw_title() {
-    draw(context, "PRIMONUMEROPHOBIA", 9, 'red', 33, 200);
+    draw(context, "PRIMONUMEROPHOBIA", 9, 'red', 340, 300);
 }
 
 };
