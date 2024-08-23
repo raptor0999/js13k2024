@@ -1,166 +1,337 @@
-import { init, Sprite, SpriteSheet, GameLoop, initKeys, keyMap, onKey, keyPressed, initGamepad, gamepadPressed, gamepadAxis } from 'kontra'
+import { init, Sprite, SpriteSheet, GameLoop, initKeys, keyMap, onKey, keyPressed, initGamepad, onGamepad, gamepadPressed, gamepadAxis } from 'kontra'
 let { canvas, context } = init();
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
   // Initialize music generation (player).
-  var playerz_game = new CPlayer();
-  var playerz_game2 = new CPlayer();
-  var playerz_menu = new CPlayer();
-  var playerz_boss = new CPlayer();
-  var playerz_death = new CPlayer();
-  var playerz_collect = new CPlayer();
-  var playerz_level = new CPlayer();
-  var playerz_level_up = new CPlayer();
-  var menu_wave;
-  var death_wave;
-  var collect_wave;
-  var level_wave;
-  var level_up_wave;
-  var boss_wave;
-  var song1_wave_src;
-  var song2_wave_src;
-  var death_wave_src;
-  var menu_wave_src;
-  var collect_wave_src;
-  var level_wave_src;
-  var level_up_wave_src;
-  var boss_wave_src;
+  var m_game1 = new CPlayer();
+  var m_game2 = new CPlayer();
+  var m_game3 = new CPlayer();
+  var m_menu = new CPlayer();
+  var m_boss = new CPlayer();
+  var m_death = new CPlayer();
+  var s_pu1 = new CPlayer();
+  var s_pu2 = new CPlayer();
+  var s_pu3 = new CPlayer();
+  var s_lp1 = new CPlayer();
+  var s_lp2 = new CPlayer();
+  var s_lp3 = new CPlayer();
+  var s_lz1 = new CPlayer();
+  var s_dr1 = new CPlayer();
+  var s_dr2 = new CPlayer();
+  var s_b1 = new CPlayer();
+  var s_lu1 = new CPlayer();
+
+  var m_menu_src;
+  var m_game1_src;
+  var m_game2_src;
+  var m_game3_src;
+  var m_boss_src;
+  var m_death_src;
+  var pu1_src;
+  var pu2_src;
+  var pu3_src;
+  var lp1_src;
+  var lp2_src;
+  var lp3_src;
+  var lz1_src;
+  var dr1_src;
+  var dr2_src;
+  var b1_src;
+  var lu1_src;
 
   // Generate music...
   var audio;
-  var pickup_audio;
-  var level_audio;
+  var sound1;
+  var sound2;
+  var sound3;
   var level_up_audio;
 
   let music_tracks = [];
   var current_music_track = 0;
 
   var done = false;
-  playerz_game.init(song);
+  m_game1.init(m_game1_d);
 
   setInterval(function () {
     if (done) {
       return;
     }
 
-    done = playerz_game.generate() >= 1;
+    done = m_game1.generate() >= 1;
 
     if (done) {
       // Put the generated song in an Audio element.
-      var wave = playerz_game.createWave();
-      song1_wave_src = URL.createObjectURL(new Blob([wave], {type: "audio/wav"}));
-      music_tracks.push(song1_wave_src);
+      var w = m_game1.createWave();
+      m_game1_src = URL.createObjectURL(new Blob([w], {type: "audio/wav"}));
+      music_tracks.push(m_game1_src);
     }
   });
 
   var done2 = false;
-  playerz_game2.init(song2);
+  m_game2.init(m_game2_d);
 
   setInterval(function () {
     if (done2) {
       return;
     }
 
-    done2 = playerz_game2.generate() >= 1;
+    done2 = m_game2.generate() >= 1;
 
     if (done2) {
       // Put the generated song in an Audio element.
-      var wave = playerz_game2.createWave();
-      song2_wave_src = URL.createObjectURL(new Blob([wave], {type: "audio/wav"}));
-      music_tracks.push(song2_wave_src);
+      var w = m_game2.createWave();
+      m_game2_src = URL.createObjectURL(new Blob([w], {type: "audio/wav"}));
+      music_tracks.push(m_game2_src);
+    }
+  });
+
+  var done3 = false;
+  m_game3.init(m_game3_d);
+
+  setInterval(function () {
+    if (done3) {
+      return;
+    }
+
+    done3 = m_game3.generate() >= 1;
+
+    if (done3) {
+      // Put the generated song in an Audio element.
+      var w = m_game3.createWave();
+      m_game3_src = URL.createObjectURL(new Blob([w], {type: "audio/wav"}));
+      music_tracks.push(m_game3_src);
     }
   });
 
   var done_death = false
-  playerz_death.init(death_song);
+  m_death.init(m_death_d);
 
   setInterval(function () {
     if (done_death) {
       return;
     }
 
-    done_death = playerz_death.generate() >= 1;
+    done_death = m_death.generate() >= 1;
 
     if (done_death) {
-      var wave = playerz_death.createWave();
-      death_wave_src = URL.createObjectURL(new Blob([wave], {type: "audio/wav"}));
+      var w = m_death.createWave();
+      m_death_src = URL.createObjectURL(new Blob([w], {type: "audio/wav"}));
     }
   });
 
   var done_menu = false
-  playerz_menu.init(menu_song);
+  m_menu.init(m_menu_d);
 
   setInterval(function () {
     if (done_menu) {
       return;
     }
 
-    done_menu = playerz_menu.generate() >= 1;
+    done_menu = m_menu.generate() >= 1;
 
     if (done_menu) {
-      var wave = playerz_menu.createWave();
-      menu_wave_src = URL.createObjectURL(new Blob([wave], {type: "audio/wav"}));
-      music_tracks.push(menu_wave_src);
-      audio = document.createElement("audio");
-      audio.src = menu_wave_src;
+      var w = m_menu.createWave();
+      m_menu_src = URL.createObjectURL(new Blob([w], {type: "audio/wav"}));
+      music_tracks.push(m_menu_src);
+      
+      audio.src = m_menu_src;
       audio.loop = true;
       audio.play();
     }
   });
 
   var done_boss = false
-  playerz_boss.init(boss_song);
+  m_boss.init(m_boss_d);
 
   setInterval(function () {
     if (done_boss) {
       return;
     }
 
-    done_boss = playerz_boss.generate() >= 1;
+    done_boss = m_boss.generate() >= 1;
 
     if (done_boss) {
-      var wave = playerz_boss.createWave();
-      boss_wave_src = URL.createObjectURL(new Blob([wave], {type: "audio/wav"}));
-      music_tracks.push(boss_wave_src);
+      var w = m_boss.createWave();
+      m_boss_src = URL.createObjectURL(new Blob([w], {type: "audio/wav"}));
+      music_tracks.push(m_boss_src);
     }
   });
 
-  var done_collect = false
-  playerz_collect.init(collect_song);
+  var done_pu1 = false
+  s_pu1.init(pu1);
 
   setInterval(function () {
-    if (done_collect) {
+    if (done_pu1) {
       return;
     }
 
-    done_collect = playerz_collect.generate() >= 1;
+    done_pu1 = s_pu1.generate() >= 1;
 
-    if (done_collect) {
-      var wave = playerz_collect.createWave();
-      collect_wave_src = URL.createObjectURL(new Blob([wave], {type: "audio/wav"}));
-      pickup_audio = document.createElement("audio");
-      pickup_audio.src = collect_wave_src;
-      pickup_audio.loop = false;
+    if (done_pu1) {
+      var w = s_pu1.createWave();
+      pu1_src = URL.createObjectURL(new Blob([w], {type: "audio/wav"}));
+
+      sound2 = document.createElement("audio");
     }
   });
 
-  var done_level = false
-  playerz_level.init(level_song);
+  var done_pu2 = false
+  s_pu2.init(pu2);
 
   setInterval(function () {
-    if (done_level) {
+    if (done_pu2) {
       return;
     }
 
-    done_level = playerz_level.generate() >= 1;
+    done_pu2 = s_pu2.generate() >= 1;
 
-    if (done_level) {
-      var wave = playerz_level.createWave();
-      level_wave_src = URL.createObjectURL(new Blob([wave], {type: "audio/wav"}));
-      level_audio = document.createElement("audio");
-      level_audio.src = level_wave_src;
-      level_audio.loop = false;
+    if (done_pu2) {
+      var w = s_pu2.createWave();
+      pu2_src = URL.createObjectURL(new Blob([w], {type: "audio/wav"}));
+    }
+  });
+
+  var done_pu3 = false
+  s_pu3.init(pu3);
+
+  setInterval(function () {
+    if (done_pu3) {
+      return;
+    }
+
+    done_pu3 = s_pu3.generate() >= 1;
+
+    if (done_pu3) {
+      var w = s_pu3.createWave();
+      pu3_src = URL.createObjectURL(new Blob([w], {type: "audio/wav"}));
+    }
+  });
+
+  var done_lp1 = false
+  s_lp1.init(lp1);
+
+  setInterval(function () {
+    if (done_lp1) {
+      return;
+    }
+
+    done_lp1 = s_lp1.generate() >= 1;
+
+    if (done_lp1) {
+      var w = s_lp1.createWave();
+      lp1_src = URL.createObjectURL(new Blob([w], {type: "audio/wav"}));
+
+      sound1 = document.createElement("audio");
+    }
+  });
+
+  var done_lp2 = false
+  s_lp2.init(lp2);
+
+  setInterval(function () {
+    if (done_lp2) {
+      return;
+    }
+
+    done_lp2 = s_lp2.generate() >= 1;
+
+    if (done_lp2) {
+      var w = s_lp2.createWave();
+      lp2_src = URL.createObjectURL(new Blob([w], {type: "audio/wav"}));
+    }
+  });
+
+  var done_lp3 = false
+  s_lp3.init(lp3);
+
+  setInterval(function () {
+    if (done_lp3) {
+      return;
+    }
+
+    done_lp3 = s_lp3.generate() >= 1;
+
+    if (done_lp3) {
+      var w = s_lp3.createWave();
+      lp3_src = URL.createObjectURL(new Blob([w], {type: "audio/wav"}));
+    }
+  });
+
+  var done_lz1 = false
+  s_lz1.init(lz1);
+
+  setInterval(function () {
+    if (done_lz1) {
+      return;
+    }
+
+    done_lz1 = s_lz1.generate() >= 1;
+
+    if (done_lz1) {
+      var w = s_lz1.createWave();
+      lz1_src = URL.createObjectURL(new Blob([w], {type: "audio/wav"}));
+    }
+
+    sound3 = document.createElement("audio");
+  });
+
+  var done_dr1 = false
+  s_dr1.init(dr1);
+
+  setInterval(function () {
+    if (done_dr1) {
+      return;
+    }
+
+    done_dr1 = s_dr1.generate() >= 1;
+
+    if (done_dr1) {
+      var w = s_dr1.createWave();
+      dr1_src = URL.createObjectURL(new Blob([w], {type: "audio/wav"}));
+    }
+  });
+
+  var done_dr2 = false
+  s_dr2.init(dr2);
+
+  setInterval(function () {
+    if (done_dr2) {
+      return;
+    }
+
+    done_dr2 = s_dr2.generate() >= 1;
+
+    if (done_dr2) {
+      var w = s_dr2.createWave();
+      dr2_src = URL.createObjectURL(new Blob([w], {type: "audio/wav"}));
+      audio = document.createElement("audio");
+
+      audio.onended = function() {
+        if (audio.src == dr2_src) {
+          audio.src = m_death_src;
+          audio.loop = false;
+          audio.currentTime = 0;
+          audio.playbackRate = 1.0;
+          audio.play();
+        }
+      }
+    }
+  });
+
+  var done_b1 = false
+  s_b1.init(b1);
+
+  setInterval(function () {
+    if (done_b1) {
+      return;
+    }
+
+    done_b1 = s_b1.generate() >= 1;
+
+    if (done_b1) {
+      var w = s_b1.createWave();
+      b1_src = URL.createObjectURL(new Blob([w], {type: "audio/wav"}));
     }
   });
 
@@ -284,12 +455,23 @@ image.onload = function() {
                   letter_fall_speed += 0.5;
                 }
             } else {
-              pickup_audio.play();
+              var temp = Math.floor((Math.random()*3));
+
+              if (temp == 0) {
+                playSound(sound1, lp1_src);
+              }
+              if (temp == 1) {
+                playSound(sound1, lp2_src);
+              }
+              if (temp == 2) {
+                playSound(sound1, lp3_src);
+              }
             }
             scorez.content = 'Score: ' + score;
 
             if(primes.includes(score)) {
                 this.isPrimed = true;
+                playSound(sound2, dr1_src);
                 this.isThrusting = false;
                 reverseBadShit();
                 doBadShit();
@@ -305,6 +487,28 @@ image.onload = function() {
           }
 
           if (lett.type == 'powerup') {
+            var temp = Math.floor((Math.random()*3));
+
+              if (temp == 0) {
+                playSound(sound1, lp1_src);
+              }
+              if (temp == 1) {
+                playSound(sound1, lp2_src);
+              }
+              if (temp == 2) {
+                playSound(sound1, lp3_src);
+              }
+
+              if (temp == 0) {
+                playSound(sound2, pu1_src);
+              }
+              if (temp == 1) {
+                playSound(sound2, pu2_src);
+              }
+              if (temp == 2) {
+                playSound(sound2, pu3_src);
+              }
+
               awardPowerup(lett.effect);
           }
 
@@ -343,8 +547,21 @@ image.onload = function() {
           scorez.content = 'Score: ' + score;
           e.ttl = 0;
 
+          var temp = Math.floor((Math.random()*3));
+
+          if (temp == 0) {
+            playSound(sound1, lp1_src);
+          }
+          if (temp == 1) {
+            playSound(sound1, lp2_src);
+          }
+          if (temp == 2) {
+            playSound(sound1, lp3_src);
+          }
+
           if(primes.includes(score)) {
               this.isPrimed = true;
+              playSound(sound2, dr1_src);
               this.isThrusting = false;
               reverseBadShit();
               doBadShit();
@@ -394,73 +611,74 @@ function rectCollide(rect1, rect2) {
   }
 }
 
-function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+function playSound(element, src) {
+    element.src = src;
+    element.play();
 }
 
-    function switchTrack(track) {
-      audio.pause()
-      audio.currentTime = 0.0;
-      audio.src = track;
-      audio.play();
+function switchTrack(track) {
+  audio.pause()
+  audio.currentTime = 0.0;
+  audio.src = track;
+  audio.play();
+}
+
+function nextMusicTrack() {
+  current_music_track += 1;
+  if (current_music_track > music_tracks.length - 1) {
+    current_music_track = 0;
+  }
+
+  audio.pause()
+  audio.currentTime = 0.0;
+  audio.src = music_tracks[current_music_track];
+  audio.play();
+}
+
+function previousMusicTrack() {
+  current_music_track -= 1;
+  if (current_music_track < 0) {
+    current_music_track = 0;
+  }
+
+  audio.pause()
+  audio.currentTime = 0.0;
+  audio.src = music_tracks[current_music_track];
+  audio.play();
+}
+
+function doBadShit() {
+    
+    player.badShit = Math.floor((Math.random()*3)+1);
+
+    if (player.badShit == 1) {
+        player.speed = -player.speed;
     }
 
-    function nextMusicTrack() {
-      current_music_track += 1;
-      if (current_music_track > music_tracks.length - 1) {
-        current_music_track = 0;
-      }
-
-      audio.pause()
-      audio.currentTime = 0.0;
-      audio.src = music_tracks[current_music_track];
-      audio.play();
+    if (player.badShit == 2) {
+        player.speed = 0.5;
     }
 
-    function previousMusicTrack() {
-      current_music_track -= 1;
-      if (current_music_track < 0) {
-        current_music_track = 0;
-      }
+    if (player.badShit == 3) {
+        player.speed = 10;
+    }
+}
 
-      audio.pause()
-      audio.currentTime = 0.0;
-      audio.src = music_tracks[current_music_track];
-      audio.play();
+function reverseBadShit() {
+    if (player.badShit == 1) {
+        player.speed = -player.speed;
     }
 
-    function doBadShit() {
-        
-        player.badShit = Math.floor((Math.random()*3)+1);
-
-        if (player.badShit == 1) {
-            player.speed = -player.speed;
-        }
-
-        if (player.badShit == 2) {
-            player.speed = 0.5;
-        }
-
-        if (player.badShit == 3) {
-            player.speed = 10;
-        }
+    if (player.badShit == 2) {
+        player.speed = player_speed;
     }
 
-    function reverseBadShit() {
-        if (player.badShit == 1) {
-            player.speed = -player.speed;
-        }
-
-        if (player.badShit == 2) {
-            player.speed = player_speed;
-        }
-
-        if (player.badShit == 3) {
-            player.speed = player_speed;
-        }
-
-        player.badShit = 0;
+    if (player.badShit == 3) {
+        player.speed = player_speed;
     }
+
+    player.badShit = 0;
+}
 
     let letterz = [];
     let primes = [2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59,61,67,71,73,79,83,89,97];
@@ -662,6 +880,7 @@ function createMidBoss() {
     update() {
       this.currentShotTime += 1;
       if(this.currentShotTime > this.shotTimer) {
+        playSound(sound3, lz1_src);
         createMidBossShot(this.x, this.y, -1, -1);
         createMidBossShot(this.x, this.y, -1, 1);
         createMidBossShot(this.x, this.y, 1, -1);
@@ -744,6 +963,7 @@ function createFinalBoss() {
     update() {
       this.currentShotTime += 1;
       if(this.currentShotTime > this.shotTimer) {
+        playSound(sound3, lz1_src);
         createFinalBossShot(this.x, this.y);
         this.currentShotTime = 0;
       }
@@ -807,6 +1027,8 @@ function createFinalBoss() {
 }
 
 function createEnemyShot(x, y) {
+  playSound(sound3, lz1_src);
+
   let enemyShot = Sprite({
     type: 'enemy_shot',
     moveX: Math.floor(Math.random()*2),
@@ -895,6 +1117,7 @@ function createFinalBossShot(finalBossX, finalBossY) {
     width: 40,     // width and height of the sprite rectangle
     height: 20,        // move the sprite 2px to the right every frame
     update(dt) {
+      this.rotation += 0.2;
       // random movement
       if (this.moveX == 0) {
         this.x -= 1*this.speed;
@@ -1040,8 +1263,12 @@ let loop = GameLoop({  // create the main game loop
 
         if (second_counter > 1) {
           timer -= 1;
-          if (primes.includes(timer)) {
+          if (level > 1 && primes.includes(timer)) {
             createEnemy((Math.floor(Math.random()*3)+1).toString(), Math.floor(Math.random()*1)+1, Math.floor(Math.random()*1)+1);
+
+            while(enemies.length > 10) {
+              enemies.splice(1, 1);
+            }
           };
           second_counter = 0;
         }
@@ -1117,9 +1344,12 @@ let loop = GameLoop({  // create the main game loop
             score = 0;
             timer = countdownStart;
 
-            if (level == 7) {
+            if (level == 4) {
               audio.playbackRate = 1.0;
-              switchTrack(song2_wave_src);
+              switchTrack(m_game3_src);
+            } else if (level == 7) {
+              audio.playbackRate = 1.0;
+              switchTrack(m_game2_src);
               createMidBoss();
             } else {
               audio.playbackRate += 0.1;
@@ -1226,6 +1456,20 @@ onKey('leftshift', function(e) {
   }
 }, {handler: 'keyup'});
 
+onGamepad('west', function(e) {
+  if (!player.isThrusting && !player.isPrimed) {
+    player.isThrusting = true;
+    player.speed = player_speed * player.thrustingMult;
+  }
+});
+
+onGamepad('west', function(e) {
+  if (player.isThrusting) {
+    player.isThrusting = false;
+    player.speed = player_speed;
+  }
+}, {handler: 'gamepadup'});
+
 function goToFinalBoss() {
   final_boss_time = true;
  
@@ -1234,13 +1478,14 @@ function goToFinalBoss() {
   timerz.ttl = 0;
   totalscorez.ttl = 0;
 
+  enemies = enemies.filter(enemy => { !enemy.isAlive(); });
   letterz = letterz.filter(letter => !letter.isAlive());
   ui = ui.filter(ui_sprite => { !ui_sprite.isAlive(); });
 
   audio.pause();
   audio.currentTime = 0;
   audio.playbackRate = 1.0;
-  audio.src = boss_wave_src;
+  audio.src = m_boss_src;
   audio.loop = true;
   audio.play();
 
@@ -1248,28 +1493,28 @@ function goToFinalBoss() {
 }
 
 var done_level_up = false
-  playerz_level_up.init(lvl_up_song);
+s_lu1.init(lu1);
 
-  setInterval(function () {
-    if (done_level_up) {
-      return;
+setInterval(function () {
+  if (done_level_up) {
+    return;
+  }
+
+  done_level_up = s_lu1.generate() >= 1;
+
+  if (done_level_up) {
+    var w = s_lu1.createWave();
+    lu1_src = URL.createObjectURL(new Blob([w], {type: "audio/wav"}));
+    level_up_audio = document.createElement("audio");
+    level_up_audio.src = lu1_src;
+    level_up_audio.loop = false;
+
+    level_up_audio.onended = function() {
+      level_score_calculating = true;
+      loop.start();
     }
-
-    done_level_up = playerz_level_up.generate() >= 1;
-
-    if (done_level_up) {
-      level_up_wave = playerz_level_up.createWave();
-      level_up_wave_src = URL.createObjectURL(new Blob([level_up_wave], {type: "audio/wav"}));
-      level_up_audio = document.createElement("audio");
-      level_up_audio.src = level_up_wave_src;
-      level_up_audio.loop = false;
-
-      level_up_audio.onended = function() {
-        level_score_calculating = true;
-        loop.start();
-      }
-    }
-  });
+  }
+});
 
 draw_title();
 title();
@@ -1283,7 +1528,7 @@ function die() {
     audio.pause();
     audio.currentTime = 0;
     audio.playbackRate = 1.0;
-    audio.src = death_wave_src;
+    audio.src = dr2_src;
     audio.loop = false;
     audio.play();
 };
@@ -1332,7 +1577,7 @@ function new_game() {
     game_started = true;
     audio.position = 0.0;
     audio.playbackRate = 1.0;
-    audio.src = song1_wave_src;
+    audio.src = m_game1_src;
     audio.loop = true;
     audio.play();
 };
@@ -1346,7 +1591,7 @@ function restart() {
       player.win = false;
       audio.position = 0.0;
       audio.playbackRate = 1.0;
-      audio.src = boss_wave_src;
+      audio.src = m_boss_src;
       audio.loop = true;
       audio.play();
     } else {
@@ -1373,7 +1618,7 @@ function restart() {
       player.ttl = Infinity;
       player.win = false;
       audio.playbackRate = 1.0;
-      audio.src = song1_wave_src;
+      audio.src = m_game1_src;
       audio.loop = loop;
       audio.play();
     }

@@ -1,1 +1,0 @@
-var level_song={songData:[{i:[2,100,128,0,3,201,128,0,0,0,5,6,58,0,0,0,0,195,6,1,2,135,0,0,32,147,6,121,6],p:[1],c:[{n:[176],f:[]}]}],rowLen:33075,patternLen:1,endPattern:0,numChannels:1};
