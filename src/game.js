@@ -381,6 +381,7 @@ let gprimes = [];
 let dubz = [];
 let gdubz = [];
 let enemies = [];
+let bombs = [];
 let ui = [];
 
 initKeys();
@@ -656,6 +657,27 @@ image.onload = function() {
 
   }
 });
+
+function createBomb(x, y) {
+  let bomb = Sprite({
+    type: 'p_bomb',
+    content: 'X',
+    x: x,        // starting x,y position of the sprite
+    y: y,
+    anchor: {x: 0.5, y: 0.5},
+    color: '#CCCCCC',  // fill color of the sprite rectangle
+    width: 20,     // width and height of the sprite rectangle
+    height: 20,        // move the sprite 2px to the right every frame
+    update() {
+    
+    },
+    render() {
+      draw(context, this.content, 4, this.color);
+    }
+  });
+
+  bombs.push(bomb);
+}
 
 function rectCollide(rect1, rect2) {
   if (rect1.x >= rect2.x - rect2.width/2 && rect1.x <= rect2.x + rect2.width/2 && rect1.y >= rect2.y - rect2.height/2 && rect1.y <= rect2.y + rect2.height/2) {
@@ -1804,7 +1826,7 @@ function goToNextLevel(skip = false) {
     // we are using dev skip
     if (skip) {
       score += 100;
-      for(var i=0; i<Math.floor(Math.random()*8)+1;i++) {
+      for(var i=0; i<5;i++) {
         awardPowerup(powerups[Math.floor(Math.random()*(powerups.length-1))].effect);
       }
     }
