@@ -430,6 +430,8 @@ image.onload = function() {
   currentThurstTime: 0.0,
   isThrusting: false,
   isThrustRefreshing: false,
+  bombTime: 5.0,
+  currentBombTime: 0.0,
   x: 360,        // starting x,y position of the sprite
   y: 240,
   anchor: {x: 0.5, y: 0.5},       // move the sprite 2px to the right every frame
@@ -441,6 +443,10 @@ image.onload = function() {
     let axisY = gamepadAxis('leftsticky', 0);
 
     this.isMoving = false;
+
+    if (this.currentBombTime > 0.0) {
+      this.currentBombTime -= 1/60;
+    }
 
     if (axisX < -0.4 || keyPressed(['arrowleft', 'a'])) {
       this.x -= 1*this.speed;
@@ -592,6 +598,19 @@ image.onload = function() {
       for(var i = 0; i < enemies.length; i++) {
         let e = enemies[i];
 
+        for(var b = 0; b < bombs.length; b++) {
+          let bomb = bombs[b];
+
+          if (rectCollide(e, bomb)) {
+            console.log('bombed');
+            if (bomb.type == 'p_bomb' && (e.type == '1' || e.type == '2' || e.type == '3' || e.type == '4')) {
+              playSound(sound2, b1_src);
+              e.ttl = 0;
+              bomb.ttl = 0;
+            }
+          }
+        }
+
         if((e.type == '1' || e.type == '2' || e.type == '3' || e.type == '4' || e.type == 'enemy_shot') && rectCollide(this, e)) {
           score -= e.scoreDamage;
           if (score < 0) {
@@ -666,16 +685,23 @@ function createBomb(x, y) {
     y: y,
     anchor: {x: 0.5, y: 0.5},
     color: '#CCCCCC',  // fill color of the sprite rectangle
-    width: 20,     // width and height of the sprite rectangle
-    height: 20,        // move the sprite 2px to the right every frame
+    width: 35,     // width and height of the sprite rectangle
+    height: 35,        // move the sprite 2px to the right every frame
+    bombTimer: 10.0,
     update() {
-    
+      this.bombTimer -= 1/60;
+
+      if (this.bombTimer < 0.0) {
+        playSound(sound2, b1_src);
+        this.ttl = 0;
+      }
     },
     render() {
       draw(context, this.content, 4, this.color);
     }
   });
 
+  player.currentBombTime = player.bombTime;
   bombs.push(bomb);
 }
 
@@ -765,7 +791,7 @@ function createLetter(dirX = 0, dirY = 1, x = Math.floor(Math.random()*canvas.wi
     type: 'letter',
     dirX: dirX,
     dirY: dirY,
-    content: Math.floor((Math.random()*8)+1).toString(),
+    content: Math.floor((Math.random()*9)+1).toString(),
     speed: letter_fall_speed,
     x: x,        // starting x,y position of the sprite
     y: y,
@@ -840,8 +866,8 @@ function createEnemy(type, speed, scoreDamage) {
     y: Math.floor(Math.random()*canvas.height),
     anchor: {x: 0.5, y: 0.5},
     color: 'yellow',  // fill color of the sprite rectangle
-    width: 20,     // width and height of the sprite rectangle
-    height: 20,        // move the sprite 2px to the right every frame
+    width: 30,     // width and height of the sprite rectangle
+    height: 30,        // move the sprite 2px to the right every frame
     update() {
       var moveX = Math.floor(Math.random()*2);
       var moveY = Math.floor(Math.random()*2);
@@ -1480,6 +1506,7 @@ let loop = GameLoop({  // create the main game loop
         });
 
         enemies = enemies.filter(enemy => enemy.isAlive());
+        bombs = bombs.filter(b => b.isAlive());
       } else {
           if (score > 0) {
             score -= 1;
@@ -1498,6 +1525,7 @@ let loop = GameLoop({  // create the main game loop
           if (score < 1 && timer < 1) {
             // start new level, clear field
             enemies = enemies.filter(enemy => { !enemy.isAlive(); });
+            bombs = bombs.filter(b => { !b.isAlive(); });
             letterz = letterz.filter(letter => { !letter.isAlive(); });
             primes = [2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59,61,67,71,73,79,83,89,97];
             dubz = [11,22,33,44,55,66,77,88,99];
@@ -1546,6 +1574,12 @@ let loop = GameLoop({  // create the main game loop
       goToNextLevel(true);
     }
 
+    if(gamepadPressed('east') || keyPressed(['e'])) {
+      if (player.currentBombTime <= 0.0) {
+        createBomb(player.x, player.y);
+      }
+    }
+
     if(keyPressed(['n']) && !mid_boss_time) {
       mid_boss_time = true;
       createMidBoss();
@@ -1569,6 +1603,10 @@ let loop = GameLoop({  // create the main game loop
 
         enemies.map(enemy => {
           enemy.render();
+        });
+
+        bombs.map(b => {
+          b.render();
         });
 
         if (!player.isAlive()) {
@@ -1645,6 +1683,7 @@ function goToFinalBoss() {
   totalscorez.ttl = 0;
 
   enemies = enemies.filter(enemy => { !enemy.isAlive(); });
+  bombs = bombs.filter(b => { !b.isAlive(); });
   letterz = letterz.filter(letter => !letter.isAlive());
   ui = ui.filter(ui_sprite => { !ui_sprite.isAlive(); });
 
@@ -1733,6 +1772,7 @@ function new_game() {
   ui.push(timerz);
 
   enemies = enemies.filter(e => !e.isAlive());
+  bombs = bombs.filter(b => { !b.isAlive(); });
 
   player.x = canvas.width/2;
   player.y = canvas.height/2+canvas.height/4;
@@ -1779,6 +1819,7 @@ function restart() {
     ui.push(timerz);
 
     enemies = enemies.filter(e => !e.isAlive());
+    bombs = bombs.filter(b => { !b.isAlive(); });
 
     player.x = canvas.width/2+canvas.height/4;
     player.y = canvas.height/2+canvas.height/4;
@@ -1796,8 +1837,6 @@ function draw_title() {
 }
 
 function awardPowerup(effect) {
-  console.log(effect);
-
   if (effect == 'magnet_range') {
     player.magnetRange += 4;
   }
