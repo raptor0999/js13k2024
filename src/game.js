@@ -377,7 +377,9 @@ powerups.push({effect:'thrust_mult', content: 'T', color: 'green'});
 powerups.push({effect:'player_speed', content: 'S', color: 'green'});
 let letterz = [];
 let primes = [];
+let gprimes = [];
 let dubz = [];
+let gdubz = [];
 let enemies = [];
 let ui = [];
 
@@ -489,6 +491,7 @@ image.onload = function() {
 
             if (score >= levelEndScore) {
                 level += 1;
+                levelz.content = "Level: " + level;
                 audio.pause();
 
                 if (level >= level_win_amount) {
@@ -499,7 +502,7 @@ image.onload = function() {
 
                   loop.stop();
                   level_up_audio.play();
-                  letter_fall_speed += 0.5;
+                  letter_fall_speed += 0.25;
                 }
             } else {
               var temp = Math.floor((Math.random()*3));
@@ -531,6 +534,8 @@ image.onload = function() {
               createPowerUp(powerups[Math.floor((Math.random()*powerups.length))]);
               dubz = dubz.filter(d => d != score);
             }
+
+            calcNextPandD();
           }
 
           if (lett.type == 'powerup') {
@@ -621,6 +626,8 @@ image.onload = function() {
             createPowerUp(powerups[Math.floor((Math.random()*powerups.length))]);
             dubz = dubz.filter(d => d != score);
           }
+
+          calcNextPandD();
         }
 
         if(e.type == 'mid_boss_shot' && rectCollide(this, e)) {
@@ -1242,6 +1249,40 @@ let scorep = Sprite({
 
 player.addChild(scorep);
 
+let nextdubp = Sprite({
+    content: score.toString(),
+    x: -23,        // starting x,y position of the sprite
+    y: 20,
+    color: 'green',  // fill color of the sprite rectangle
+    width: 15,     // width and height of the sprite rectangle
+    height: 15,        // move the sprite 2px to the right every frame
+    update() {
+      
+    },
+    render() {
+      draw(context, this.content, 3, this.color);
+    }
+  });
+
+player.addChild(nextdubp);
+
+let nextprimep = Sprite({
+    content: score.toString(),
+    x: 13,        // starting x,y position of the sprite
+    y: 20,
+    color: 'red',  // fill color of the sprite rectangle
+    width: 15,     // width and height of the sprite rectangle
+    height: 15,        // move the sprite 2px to the right every frame
+    update() {
+      
+    },
+    render() {
+      draw(context, this.content, 3, this.color);
+    }
+  });
+
+player.addChild(nextprimep);
+
 let timerz = Sprite({
     content: 'Time Left: ' + timer,
     x: 5,        // starting x,y position of the sprite
@@ -1286,6 +1327,22 @@ let totalscorez = Sprite({
   });
 ui.push(totalscorez);
 
+function calcNextPandD() {
+  gprimes = primes.filter(p => p > score);
+  gdubz = dubz.filter(d => d > score);
+
+  var c = (gprimes[0] - score).toString();
+  if (c == 'NaN') {
+    c = ' ';
+  }
+  nextprimep.content = c;
+  c = (gdubz[0] - score).toString();
+  if (c == 'NaN') {
+    c = ' ';
+  }
+  nextdubp.content = c;
+}
+
 let loop = GameLoop({  // create the main game loop
   update: function() { // update the game state
     if (player.isAlive()) {
@@ -1308,26 +1365,52 @@ let loop = GameLoop({  // create the main game loop
         if (current_letter_spawn_time > letter_spawn_time) {
           if (level < 3) {
             createLetter();
-          } else if (level >= 3 && level < 8) {
+          } else if (level >= 3 && level < 7) {
             var temp = Math.floor(Math.random()*2);
             if (temp == 0) {
-              createLetter(0, 1)
+              createLetter(0, 1);
             } else {
               createLetter(0, -1, Math.floor(Math.random()*canvas.width), canvas.height);
             }
-          } else if (level >= 8 && level < 11) {
+          } else if (level >= 7 && level < 10) {
             var temp = Math.floor(Math.random()*4);
             if (temp == 0) {
-              createLetter(0, 1)
+              createLetter(0, 1);
             } 
             if (temp == 1) {
-              createLetter(0, -1, Math.floor(Math.random()*canvas.width), canvas.height)
+              createLetter(0, -1, Math.floor(Math.random()*canvas.width), canvas.height);
             }
             if (temp == 2) {
-              createLetter(1, 0, 0, Math.floor(Math.random()*canvas.height))
+              createLetter(1, 0, 0, Math.floor(Math.random()*canvas.height));
             } 
             if (temp == 3) {
-              createLetter(-1, 0, canvas.width, Math.floor(Math.random()*canvas.height))
+              createLetter(-1, 0, canvas.width, Math.floor(Math.random()*canvas.height));
+            }
+          } else if (level > 9) {
+            var temp = Math.floor(Math.random()*8);
+            if (temp == 0) {
+              createLetter(0, 1);
+            } 
+            if (temp == 1) {
+              createLetter(0, -1, Math.floor(Math.random()*canvas.width), canvas.height);
+            }
+            if (temp == 2) {
+              createLetter(1, 0, 0, Math.floor(Math.random()*canvas.height));
+            } 
+            if (temp == 3) {
+              createLetter(-1, 0, canvas.width, Math.floor(Math.random()*canvas.height));
+            }
+            if (temp == 4) {
+              createLetter(1, 1, Math.floor(Math.random()*canvas.width), 0);
+            } 
+            if (temp == 5) {
+              createLetter(-1, 1, Math.floor(Math.random()*canvas.width), 0);
+            }
+            if (temp == 6) {
+              createLetter(1, -1, Math.floor(Math.random()*canvas.width), canvas.height);
+            } 
+            if (temp == 7) {
+              createLetter(-1, -1, Math.floor(Math.random()*canvas.width), canvas.height);
             }
           }
           current_letter_spawn_time = 0.0;
@@ -1400,6 +1483,7 @@ let loop = GameLoop({  // create the main game loop
             level_score_calculating = false;
             score = 0;
             timer = countdownStart;
+            calcNextPandD();
 
             if (level == 4) {
               audio.playbackRate = 1.0;
@@ -1417,26 +1501,27 @@ let loop = GameLoop({  // create the main game loop
             if (level == 13) {
               goToFinalBoss();
             }
-
-            levelz.content = "Level: " + level;
           }
       }
-
         ui.map(ui_sprite => {
           ui_sprite.update();
         });
     } else {
-        if (game_started && (gamepadPressed('south') || keyPressed(['r', 'enter', 'space']))) {
+        if (game_started && (gamepadPressed('start') || gamepadPressed('south') || keyPressed(['r', 'enter', 'space']))) {
             restart();
         }
 
-        if (!game_started  && (gamepadPressed('south') || keyPressed(['r', 'enter', 'space']))) {
+        if (!game_started  && (gamepadPressed('start') || gamepadPressed('south') || keyPressed(['r', 'enter', 'space']))) {
             new_game();
         }
     }
 
     if(gamepadPressed('select') || keyPressed(['m'])) {
-        audio.muted = !audio.muted;
+      audio.muted = !audio.muted;
+    }
+
+    if(gamepadPressed('north') || keyPressed(['l'])) {
+      goToNextLevel(true);
     }
 
     if(keyPressed(['n']) && !mid_boss_time) {
@@ -1619,6 +1704,7 @@ function new_game() {
   timer = countdownStart;
   second_counter = 0;
   timerz.content = 'Time Left: ' + timer;
+  calcNextPandD();
 
   ui.push(levelz);
   ui.push(scorez);
@@ -1664,6 +1750,7 @@ function restart() {
     timer = countdownStart;
     second_counter = 0;
     timerz.content = 'Time Left: ' + timer;
+    calcNextPandD();
 
     ui.push(levelz);
     ui.push(scorez);
@@ -1687,6 +1774,8 @@ function draw_title() {
 }
 
 function awardPowerup(effect) {
+  console.log(effect);
+
   if (effect == 'magnet_range') {
     player.magnetRange += 4;
   }
@@ -1706,6 +1795,32 @@ function awardPowerup(effect) {
     player_speed += 0.1;
     player.speed = player_speed;
   }
+}
+
+function goToNextLevel(skip = false) {
+    level += 1;
+    audio.pause();
+
+    // we are using dev skip
+    if (skip) {
+      score += 100;
+      for(var i=0; i<Math.floor(Math.random()*8)+1;i++) {
+        awardPowerup(powerups[Math.floor(Math.random()*(powerups.length-1))].effect);
+      }
+    }
+
+    if (level >= level_win_amount) {
+        win();
+        draw_win();
+    } else {
+      draw(context, 'Next Level!', 9, '#FFFFFF', 125, 200);
+
+      loop.stop();
+      level_up_audio.play();
+      letter_fall_speed += 0.25;
+  }
+
+  levelz.content = "Level: " + level;
 }
 
 };
