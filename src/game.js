@@ -360,6 +360,8 @@ var total_score = 0;
 var timer = countdownStart;
 var second_counter = 0;
 var game_started = false;
+var title_started = true;
+var intro_started = false;
 var level_score_calculating = false;
 var mid_boss_time = false;
 var final_boss_time = false;
@@ -375,6 +377,8 @@ powerups.push({effect:'thrust_time', content: 'T', color: 'orange'});
 powerups.push({effect:'thrust_refresh_time', content: 'T', color: 'brown'});
 powerups.push({effect:'thrust_mult', content: 'T', color: 'green'});
 powerups.push({effect:'player_speed', content: 'S', color: 'green'});
+powerups.push({effect:'bomb_dmg', content: 'B', color: 'yellow'});
+powerups.push({effect:'bomb_time', content: 'B', color: 'orange'});
 let letterz = [];
 let primes = [];
 let gprimes = [];
@@ -430,6 +434,7 @@ image.onload = function() {
   currentThurstTime: 0.0,
   isThrusting: false,
   isThrustRefreshing: false,
+  bombDmg: 5,
   bombTime: 5.0,
   currentBombTime: 0.0,
   x: 360,        // starting x,y position of the sprite
@@ -602,11 +607,35 @@ image.onload = function() {
           let bomb = bombs[b];
 
           if (rectCollide(e, bomb)) {
-            console.log('bombed');
             if (bomb.type == 'p_bomb' && (e.type == '1' || e.type == '2' || e.type == '3' || e.type == '4')) {
               playSound(sound2, b1_src);
               e.ttl = 0;
               bomb.ttl = 0;
+            }
+
+            if (bomb.type == 'p_bomb' && (e.type == 'mid_boss' || e.type == 'final_boss')) {
+              if (bomb.active) {
+                playSound(sound2, b1_src);
+                e.hp -= bomb.dmg;
+                e.children[0].content = e.hp.toString();
+                if (e.hp < 1 && e.ttl > 0) {
+                  e.ttl = 0;
+
+                  if (e.type == 'mid_boss') {
+                    score += 500;
+                    scorez.content = 'Score: ' + score;
+                  }
+
+                  if (e.type == 'final_boss') {
+                    score += 1000;
+                    scorez.content = 'Score: ' + score;
+                    win();
+                    draw_win();
+                  }
+                }
+                bomb.ttl = 0;
+                bomb.active = false;
+              }
             }
           }
         }
@@ -677,9 +706,10 @@ image.onload = function() {
   }
 });
 
-function createBomb(x, y) {
+function createBomb(x, y, dmg) {
   let bomb = Sprite({
     type: 'p_bomb',
+    active: true,
     content: 'X',
     x: x,        // starting x,y position of the sprite
     y: y,
@@ -687,6 +717,7 @@ function createBomb(x, y) {
     color: '#CCCCCC',  // fill color of the sprite rectangle
     width: 35,     // width and height of the sprite rectangle
     height: 35,        // move the sprite 2px to the right every frame
+    dmg: dmg,
     bombTimer: 10.0,
     update() {
       this.bombTimer -= 1/60;
@@ -953,6 +984,7 @@ function generateEnemyContent(type) {
 function createMidBoss() {
   let midBoss = Sprite({
     type: 'mid_boss',
+    hp: 5,
     shotTimer: 120,
     currentShotTime: 0,
     content: 'PR1M3',
@@ -962,8 +994,8 @@ function createMidBoss() {
     y: Math.floor(Math.random()*canvas.height),
     anchor: {x: 0.5, y: 0.5},
     color: 'yellow',  // fill color of the sprite rectangle
-    width: 100,     // width and height of the sprite rectangle
-    height: 20,        // move the sprite 2px to the right every frame
+    width: 120,     // width and height of the sprite rectangle
+    height: 50,        // move the sprite 2px to the right every frame
     update() {
       this.currentShotTime += 1;
       if(this.currentShotTime > this.shotTimer) {
@@ -1030,12 +1062,30 @@ function createMidBoss() {
     }
   });
 
+  let mid_hp_disp = Sprite({
+    content: midBoss.hp.toString(),
+    x: -10,        // starting x,y position of the sprite
+    y: 25,
+    color: 'red',  // fill color of the sprite rectangle
+    width: 30,     // width and height of the sprite rectangle
+    height: 30,        // move the sprite 2px to the right every frame
+    update() {
+      
+    },
+    render() {
+      draw(context, this.content, 4, this.color);
+    }
+  });
+
+  midBoss.addChild(mid_hp_disp);
+
   enemies.push(midBoss);
 }
 
 function createFinalBoss() {
   let finalBoss = Sprite({
     type: 'final_boss',
+    hp: 5,
     shotTimer: 60,
     currentShotTime: 0,
     content: '8055',
@@ -1045,8 +1095,8 @@ function createFinalBoss() {
     y: Math.floor(Math.random()*canvas.height),
     anchor: {x: 0.5, y: 0.5},
     color: 'red',  // fill color of the sprite rectangle
-    width: 80,     // width and height of the sprite rectangle
-    height: 20,        // move the sprite 2px to the right every frame
+    width: 100,     // width and height of the sprite rectangle
+    height: 50,        // move the sprite 2px to the right every frame
     update() {
       this.currentShotTime += 1;
       if(this.currentShotTime > this.shotTimer) {
@@ -1110,6 +1160,23 @@ function createFinalBoss() {
     }
   });
 
+  let final_hp_disp = Sprite({
+    content: finalBoss.hp.toString(),
+    x: -10,        // starting x,y position of the sprite
+    y: 25,
+    color: 'red',  // fill color of the sprite rectangle
+    width: 30,     // width and height of the sprite rectangle
+    height: 30,        // move the sprite 2px to the right every frame
+    update() {
+      
+    },
+    render() {
+      draw(context, this.content, 4, this.color);
+    }
+  });
+
+  finalBoss.addChild(final_hp_disp);
+
   enemies.push(finalBoss);
 }
 
@@ -1121,7 +1188,7 @@ function createEnemyShot(x, y) {
     moveX: Math.floor(Math.random()*2),
     moveY: Math.floor(Math.random()*2),
     ttl: 180,
-    content: 'O',
+    content: '5',
     speed: 3,
     scoreDamage: 1,
     isMoving: false,
@@ -1132,6 +1199,8 @@ function createEnemyShot(x, y) {
     width: 10,     // width and height of the sprite rectangle
     height: 10,        // move the sprite 2px to the right every frame
     update(dt) {
+      this.rotation += 0.1;
+
       // random movement
       if (this.moveX == 0) {
         this.x -= 1*this.speed;
@@ -1331,10 +1400,26 @@ let nextprimep = Sprite({
 
 player.addChild(nextprimep);
 
+let totalscorez = Sprite({
+    content: 'Total: ' + total_score,
+    x: 5,        // starting x,y position of the sprite
+    y: 55,
+    color: '#eeeeee',  // fill color of the sprite rectangle
+    width: 20,     // width and height of the sprite rectangle
+    height: 20,        // move the sprite 2px to the right every frame
+    update() {
+      
+    },
+    render() {
+      draw(context, this.content, 4, this.color);
+    }
+  });
+ui.push(totalscorez);
+
 let timerz = Sprite({
     content: 'Time Left: ' + timer,
     x: 5,        // starting x,y position of the sprite
-    y: 55,
+    y: 80,
     color: '#eeeeee',  // fill color of the sprite rectangle
     width: 20,     // width and height of the sprite rectangle
     height: 20,        // move the sprite 2px to the right every frame
@@ -1359,22 +1444,6 @@ let timerz = Sprite({
   });
 ui.push(timerz);
 
-let totalscorez = Sprite({
-    content: 'Total: ' + total_score,
-    x: 5,        // starting x,y position of the sprite
-    y: 80,
-    color: '#eeeeee',  // fill color of the sprite rectangle
-    width: 20,     // width and height of the sprite rectangle
-    height: 20,        // move the sprite 2px to the right every frame
-    update() {
-      
-    },
-    render() {
-      draw(context, this.content, 4, this.color);
-    }
-  });
-ui.push(totalscorez);
-
 function calcNextPandD() {
   gprimes = primes.filter(p => p > score);
   gdubz = dubz.filter(d => d > score);
@@ -1390,6 +1459,33 @@ function calcNextPandD() {
   }
   nextdubp.content = c;
 }
+
+let intro = Sprite({
+    content: 'In the beginning: there were only evens',
+    title: 'PRIMONUMEROPHOBIA',
+    page1: 'In the beginning: there were only evens',
+    page2: 'Odds came about: and were sus',
+    page3: 'It made the primes: EVIL EVIL EVIL',
+    page4: 'Get thee hence! You prime',
+    opacity: 1.0,
+    x: 340,        // starting x,y position of the sprite
+    y: 300,
+    color: '#ffffff',  // fill color of the sprite rectangle
+    update() {
+      
+    },
+    render() {
+      if(title_started) {
+        draw(context, this.title, 9, 'red');
+      }
+      if(!title_started && intro_started) {
+        draw(context, this.page1, 4, this.color);
+        draw(context, this.page2, 4, this.color, 0, 64);
+        draw(context, this.page3, 4, this.color, 0, 128);
+        draw(context, this.page4, 4, this.color, 0, 192);
+      }
+    }
+  });
 
 let loop = GameLoop({  // create the main game loop
   update: function() { // update the game state
@@ -1434,7 +1530,7 @@ let loop = GameLoop({  // create the main game loop
             if (temp == 3) {
               createLetter(-1, 0, canvas.width, Math.floor(Math.random()*canvas.height));
             }
-          } else if (level > 9) {
+          } else if (level > 9 && level < 13) {
             var temp = Math.floor(Math.random()*8);
             if (temp == 0) {
               createLetter(0, 1);
@@ -1466,22 +1562,15 @@ let loop = GameLoop({  // create the main game loop
 
         player.update();
 
-        // wrap the sprites position when it reaches
-        // the edge of the screen
+        // keep player in screen
         if (player.x > canvas.width) {
           player.x = canvas.width;
         }
         if (player.x < 0) {
           player.x = 0;
         }
-        if (final_boss_time) {
-          if (player.y < 0) {
-            player.y = 0;
-          }
-        } else {
-          if (player.y < 0) {
-            player.y = 0;
-          }
+        if (player.y < 0) {
+          player.y = 0;
         }
         if (player.y > canvas.height) {
           player.y = canvas.height;
@@ -1561,7 +1650,7 @@ let loop = GameLoop({  // create the main game loop
             restart();
         }
 
-        if (!game_started  && (gamepadPressed('start') || gamepadPressed('south') || keyPressed(['r', 'enter', 'space']))) {
+        if (!game_started && (gamepadPressed('start') || gamepadPressed('south') || keyPressed(['r', 'enter', 'space']))) {
             new_game();
         }
     }
@@ -1576,7 +1665,7 @@ let loop = GameLoop({  // create the main game loop
 
     if(gamepadPressed('east') || keyPressed(['e'])) {
       if (player.currentBombTime <= 0.0) {
-        createBomb(player.x, player.y);
+        createBomb(player.x, player.y, player.bombDmg);
       }
     }
 
@@ -1613,11 +1702,17 @@ let loop = GameLoop({  // create the main game loop
             if (player.win) {
                 draw_win();
             } else {
-                draw(context, "GAME OVER", 12, 'red', 125, 200);
+                draw(context, "GAME OVER", 12, 'red', 420, 300);
             }
         }
     } else {
+      if(title_started) {
         draw_title();
+      }
+      if(intro_started) {
+        intro.update();
+        intro.render();
+      }
     }
   }
 });
@@ -1676,11 +1771,8 @@ onGamepad('west', function(e) {
 
 function goToFinalBoss() {
   final_boss_time = true;
- 
-  levelz.ttl = 0;
-  scorez.ttl = 0;
+  levelz.color = 'red';
   timerz.ttl = 0;
-  totalscorez.ttl = 0;
 
   enemies = enemies.filter(enemy => { !enemy.isAlive(); });
   bombs = bombs.filter(b => { !b.isAlive(); });
@@ -1747,7 +1839,7 @@ function win() {
 }
 
 function draw_win() {
-  draw(context, "YOU WIN!", 12, 'red', 150, 200);
+  draw(context, "YOU WIN!", 12, 'red', 460, 300);
 }
 
 function new_game() {
@@ -1755,7 +1847,7 @@ function new_game() {
   mid_boss_time = false;
   primes = [2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59,61,67,71,73,79,83,89,97];
   dubz = [11,22,33,44,55,66,77,88,99];
-  level = 1;
+  level = 0;
   levelEndScore = 100;
   levelz.content = 'Level: ' + level;
   score = 0;
@@ -1779,6 +1871,8 @@ function new_game() {
   player.ttl = Infinity;
   player.win = false;
   game_started = true;
+  title_started = true;
+  intro_started = false;
   audio.position = 0.0;
   audio.playbackRate = 1.0;
   audio.src = m_game1_src;
@@ -1855,6 +1949,12 @@ function awardPowerup(effect) {
   if (effect == 'player_speed') {
     player_speed += 0.1;
     player.speed = player_speed;
+  }
+  if (effect == 'bomb_dmg') {
+    player.bombDmg += 1;
+  }
+  if (effect == 'bomb_time') {
+    player.bomb_time -= 0.2;
   }
 }
 

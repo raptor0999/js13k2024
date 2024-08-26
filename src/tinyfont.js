@@ -264,7 +264,14 @@ var letters = letters = {
             [, ,],
             [, ,],
             [, ,]
-        ]
+        ],
+        ',':[
+            [0,0,0],
+            [0,0,0],
+            [0,0,0],
+            [0,1,0],
+            [1,1,0]
+        ],
     };
 
     function draw(string, size, color, draw_x=0, draw_y=0) {
