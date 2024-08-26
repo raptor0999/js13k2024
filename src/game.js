@@ -984,7 +984,7 @@ function generateEnemyContent(type) {
 function createMidBoss() {
   let midBoss = Sprite({
     type: 'mid_boss',
-    hp: 5,
+    hp: 60,
     shotTimer: 120,
     currentShotTime: 0,
     content: 'PR1M3',
@@ -1085,7 +1085,7 @@ function createMidBoss() {
 function createFinalBoss() {
   let finalBoss = Sprite({
     type: 'final_boss',
-    hp: 5,
+    hp: 120,
     shotTimer: 60,
     currentShotTime: 0,
     content: '8055',
@@ -1720,8 +1720,10 @@ let loop = GameLoop({  // create the main game loop
 onKey(['p'], function(e) {
   if (loop.isStopped) {
     loop.start();
+    audio.play();
   } else {
     loop.stop();
+    audio.pause();
   }
 });
 
@@ -1847,7 +1849,7 @@ function new_game() {
   mid_boss_time = false;
   primes = [2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59,61,67,71,73,79,83,89,97];
   dubz = [11,22,33,44,55,66,77,88,99];
-  level = 0;
+  level = 1;
   levelEndScore = 100;
   levelz.content = 'Level: ' + level;
   score = 0;
