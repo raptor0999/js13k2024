@@ -1433,7 +1433,7 @@ let loop = GameLoop({  // create the main game loop
     } else {
       if(game_started && !level_started && !intro_started && !tutorial_started) {
         draw(context, "LEVEL COMPLETE", 12, 'green', 320, 300);
-        draw(context, "PRESS START OR SOUTH BUTTON TO CONTINUE", 4, 'white', 375, 380);
+        draw(context, "PRESS START OR SOUTH BUTTON FOR NEXT LEVEL", 4, 'white', 335, 380);
       }
     }
 
