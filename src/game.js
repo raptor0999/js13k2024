@@ -279,7 +279,7 @@ image.onload = function() {
         }
 
         // magnet gainz
-        if(lett.x >= this.x - this.magnetRange && lett.x <= this.x + this.magnetRange) {
+        if(lett.content != getNextPrime() && lett.x >= this.x - this.magnetRange && lett.x <= this.x + this.magnetRange) {
            if(lett.y >= this.y - this.magnetRange && lett.y <= this.y + this.magnetRange) {
               // we are within magnet range!
               if(lett.x > this.x) {
@@ -1085,6 +1085,10 @@ let nextprimep = Sprite({
   });
 
 player.addChild(nextprimep);
+
+function getNextPrime() {
+  return nextprimep.content;
+}
 
 let totalscorez = Sprite({
     content: 'Total: ' + total_score,
