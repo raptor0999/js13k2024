@@ -124,6 +124,9 @@ image.onload = function() {
   bombDmg: 5,
   bombTime: 5.0,
   currentBombTime: 0.0,
+  stunTime: 0.5,
+  currentStunTime: 0.0,
+  isStunned: false,
   x: 360,        // starting x,y position of the sprite
   y: 240,
   anchor: {x: 0.5, y: 0.5},       // move the sprite 2px to the right every frame
@@ -140,22 +143,32 @@ image.onload = function() {
       this.currentBombTime -= 1/60;
     }
 
-    if (axisX < -0.4 || keyPressed(['arrowleft', 'a'])) {
-      this.x -= 1*this.speed;
-      this.isMoving = true;
-    }
-    else if (axisX > 0.4 || keyPressed(['arrowright', 'd'])) {
-      this.x += 1*this.speed;
-      this.isMoving = true;
+    if (this.isStunned) {
+      this.currentStunTime += 1/60;
+      if(this.currentStunTime >= this.stunTime) {
+        this.isStunned = false;
+        this.currentStunTime = 0.0
+      }
     }
 
-    if (axisY < -0.4 || keyPressed(['arrowup', 'w'])) {
-      this.y -= 1*this.speed;
-      this.isMoving = true;
-    }
-    else if (axisY > 0.4 || keyPressed(['arrowdown', 's'])) {
-      this.y += 1*this.speed;
-      this.isMoving = true;
+    if(!this.isStunned) {
+      if (axisX < -0.4 || keyPressed(['arrowleft', 'a'])) {
+        this.x -= 1*this.speed;
+        this.isMoving = true;
+      }
+      else if (axisX > 0.4 || keyPressed(['arrowright', 'd'])) {
+        this.x += 1*this.speed;
+        this.isMoving = true;
+      }
+
+      if (axisY < -0.4 || keyPressed(['arrowup', 'w'])) {
+        this.y -= 1*this.speed;
+        this.isMoving = true;
+      }
+      else if (axisY > 0.4 || keyPressed(['arrowdown', 's'])) {
+        this.y += 1*this.speed;
+        this.isMoving = true;
+      }
     }
 
     if(this.isThrusting) {
@@ -335,6 +348,8 @@ image.onload = function() {
           }
           scorez.content = 'Score: ' + score;
           e.ttl = 0;
+
+          this.isStunned = true;
 
           var temp = Math.floor((Math.random()*3));
 
@@ -1313,7 +1328,7 @@ let loop = GameLoop({  // create the main game loop
             totalscorez.content = "Total: " + total_score;
           }
 
-          if (score < 1 && timer < 1) {
+          if (score < 1 && timer < 1 && level_up_audio.currentTime > 2.6) {
             // start new level, clear field
             enemies = enemies.filter(enemy => { !enemy.isAlive(); });
             bombs = bombs.filter(b => { !b.isAlive(); });
