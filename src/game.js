@@ -27,6 +27,7 @@ var t_src = {
 
 // Generate music...
 var audio = document.createElement("audio");
+audio.loop = true;
 var sound1 = document.createElement("audio");
 var sound2 = document.createElement("audio");
 var sound3 = document.createElement("audio");
@@ -47,6 +48,7 @@ var game_started = false;
 var level_started = false;
 var title_started = true;
 var intro_started = false;
+var tutorial_started = false;
 var level_score_calculating = false;
 var mid_boss_time = false;
 var final_boss_time = false;
@@ -293,7 +295,7 @@ image.onload = function() {
           let bomb = bombs[b];
 
           if (rectCollide(e, bomb)) {
-            if (bomb.type == 'p_bomb' && (e.type == '1' || e.type == '2' || e.type == '3' || e.type == '4')) {
+            if (bomb.type == 'p_bomb' && (e.type == '2' || e.type == '3' || e.type == '5' || e.type == '7')) {
               playSound(sound2, t_src.b1_src);
               e.ttl = 0;
               bomb.ttl = 0;
@@ -326,7 +328,7 @@ image.onload = function() {
           }
         }
 
-        if((e.type == '1' || e.type == '2' || e.type == '3' || e.type == '4' || e.type == 'enemy_shot') && rectCollide(this, e)) {
+        if((e.type == '2' || e.type == '3' || e.type == '5' || e.type == '7' || e.type == 'enemy_shot') && rectCollide(this, e)) {
           score -= e.scoreDamage;
           if (score < 0) {
             score = 0;
@@ -573,7 +575,7 @@ function createPowerUp(p) {
 function createEnemy(type, speed, scoreDamage) {
   let enemy = Sprite({
     type: type,
-    content: generateEnemyContent(type),
+    content: type,
     speed: speed,
     scoreDamage: scoreDamage,
     shotTimer: 60,
@@ -589,7 +591,7 @@ function createEnemy(type, speed, scoreDamage) {
       var moveX = Math.floor(Math.random()*2);
       var moveY = Math.floor(Math.random()*2);
 
-      if (type == '2' || type == '4') {
+      if (type == '3' || type == '7') {
         this.currentShotTime += 1;
         if(this.currentShotTime > this.shotTimer) {
           createEnemyShot(this.x, this.y);
@@ -650,21 +652,6 @@ function createEnemy(type, speed, scoreDamage) {
   });
 
   enemies.push(enemy);
-}
-
-function generateEnemyContent(type) {
-  if (type == '1') {
-    return '2';
-  }
-  if (type == '2') {
-    return '3';
-  }
-  if (type == '3') {
-    return '5';
-  }
-  if (type == '4') {
-    return '7';
-  }
 }
 
 function createMidBoss() {
@@ -1147,18 +1134,33 @@ function calcNextPandD() {
 }
 
 let intro = Sprite({
-    content: 'In the beginning: there were only evens',
     title: 'PRIMONUMEROPHOBIA',
     page1: 'In the beginning: there were only evens',
     page2: 'Odds came about: and were sus',
     page3: 'It made the primes: EVIL EVIL EVIL',
     page4: 'Get thee hence! You prime',
+    tut1: 'WASD or Arrows or Left Stick to move',
+    tut2: 'Shift or West Gamepad button to thrust',
+    tut3: 'E or East Gamepad button to plant bomb',
+    tut4: 'M or Select to toggle music',
+    tut5: 'P or Start to pause',
     opacity: 1.0,
     x: 340,        // starting x,y position of the sprite
     y: 300,
     color: '#ffffff',  // fill color of the sprite rectangle
     update() {
-      
+      if ((gamepadPressed('start') || gamepadPressed('south') || keyPressed(['r', 'enter', 'space']))) {
+        if (intro_started) {
+          intro_started = false;
+          tutorial_started = true;
+          console.log('tut');
+        }
+        if (title_started) {
+          title_started = false;
+          intro_started = true;
+          console.log('intro');
+        }
+      }
     },
     render() {
       if(title_started) {
@@ -1169,6 +1171,13 @@ let intro = Sprite({
         draw(context, this.page2, 4, this.color, 0, 64);
         draw(context, this.page3, 4, this.color, 0, 128);
         draw(context, this.page4, 4, this.color, 0, 192);
+      }
+      if(!title_started && !intro_started && tutorial_started) {
+        draw(context, this.tut1, 4, this.color);
+        draw(context, this.tut2, 4, this.color, 0, 64);
+        draw(context, this.tut3, 4, this.color, 0, 128);
+        draw(context, this.tut4, 4, this.color, 0, 192);
+        draw(context, this.tut5, 4, this.color, 0, 256);
       }
     }
   });
@@ -1183,7 +1192,9 @@ let loop = GameLoop({  // create the main game loop
         if (second_counter > 1) {
           timer -= 1;
           if (level > 1 && primes.includes(timer)) {
-            createEnemy((Math.floor(Math.random()*3)+1).toString(), Math.floor(Math.random()*1)+1, Math.floor(Math.random()*1)+1);
+            var t = [2, 3, 5, 7];
+            var r = Math.floor(Math.random()*4);
+            createEnemy(t[r].toString(), Math.floor(Math.random()*1)+1, t[r]);
 
             while(enemies.length > 10) {
               enemies.splice(1, 1);
@@ -1330,15 +1341,18 @@ let loop = GameLoop({  // create the main game loop
           ui_sprite.update();
         });
     } else {
-        if (game_started && !player.isAlive() && (gamepadPressed('start') || gamepadPressed('south') || keyPressed(['r', 'enter', 'space']))) {
+        if (game_started && !player.isAlive() && ((gamepadPressed('start') || gamepadPressed('south') || keyPressed(['r', 'enter', 'space'])))) {
             restart();
+            console.log('restart');
         }
 
-        if (!game_started && (gamepadPressed('start') || gamepadPressed('south') || keyPressed(['r', 'enter', 'space']))) {
+        if (!intro_started && !tutorial_started && !game_started && ((gamepadPressed('start') || gamepadPressed('south') || keyPressed(['r', 'enter', 'space'])))) {
             new_game();
+            console.log('newgame');
         }
 
-        if (!level_started && (gamepadPressed('start') || gamepadPressed('south') || keyPressed(['r', 'enter', 'space']))) {
+        if (!intro_started && !tutorial_started && !level_started && ((gamepadPressed('start') || gamepadPressed('south') || keyPressed(['r', 'enter', 'space'])))) {
+          console.log('level started');
           if (level <= 3) {
             audio.playbackRate = 1.0;
             switchTrack(t_src.m_game1_src);
@@ -1417,22 +1431,16 @@ let loop = GameLoop({  // create the main game loop
             }
         }
     } else {
-      if(title_started) {
-        draw_title();
+      if(game_started && !level_started && !intro_started && !tutorial_started) {
+        draw(context, "LEVEL COMPLETE", 12, 'green', 320, 300);
+        draw(context, "PRESS START OR SOUTH BUTTON TO CONTINUE", 4, 'white', 375, 380);
       }
-      if(intro_started) {
+    }
+
+    if(title_started || intro_started || tutorial_started) {
         intro.update();
         intro.render();
       }
-      if(tutorial_started) {
-        tutorial.update();
-        tutorial.render();
-      }
-      if(game_started && !level_started) {
-        draw(context, "LEVEL COMPLETE", 12, 'green', 320, 300);
-        draw(context, "PRESS KEY OR BUTTON TO CONTINUE", 4, 'white', 425, 380);
-      }
-    }
   }
 });
 
@@ -1575,7 +1583,6 @@ level_up_audio.onended = function() {
   loop.start();
 }  
 
-draw_title();
 loop.start();    // start the game
 
 function die() {
@@ -1632,15 +1639,11 @@ function new_game() {
   player.y = canvas.height/2+canvas.height/4;
   player.ttl = Infinity;
   player.win = false;
-  game_started = true;
-  level_started = true;
   title_started = false;
+  game_started = true;
   intro_started = false;
-  audio.position = 0.0;
-  audio.playbackRate = 1.0;
-  audio.src = t_src.m_game1_src;
-  audio.loop = true;
-  audio.play();
+  tutorial_started = false;
+  level_started = false;
 };
 
 function restart() {
@@ -1653,12 +1656,9 @@ function restart() {
     player.ttl = Infinity;
     player.win = false;
     title_started = false;
+    intro_started = false;
+    tutorial_started = false;
     level_started = true;
-    audio.position = 0.0;
-    audio.playbackRate = 1.0;
-    audio.src = t_src.m_boss_src;
-    audio.loop = true;
-    audio.play();
   } else {
     mid_boss_time = false;
     final_boss_time = false;
@@ -1685,17 +1685,11 @@ function restart() {
     player.ttl = Infinity;
     player.win = false;
     title_started = false;
+    intro_started = false;
+    tutorial_started = false;
     level_started = true;
-    audio.playbackRate = 1.0;
-    audio.src = t_src.m_game1_src;
-    audio.loop = loop;
-    audio.play();
   }
 };
-
-function draw_title() {
-    draw(context, "PRIMONUMEROPHOBIA", 9, 'red', 340, 300);
-}
 
 function awardPowerup(effect) {
   if (effect == 'magnet_range') {
